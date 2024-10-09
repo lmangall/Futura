@@ -42,7 +42,7 @@ function App() {
   function handleSubmit(event) {
     event.preventDefault();
     const name = event.target.elements.name.value;
-    Futura_backend.greet(name).then((greeting) => {
+    futura_backend.greet(name).then((greeting) => {
       setGreeting(greeting);
     });
     return false;
