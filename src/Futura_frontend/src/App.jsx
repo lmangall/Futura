@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { futura_backend } from "declarations/futura_backend";
 import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
+import { Button } from "./components/ui/button";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -27,7 +28,9 @@ function App() {
     }
 
     // Get the user's principal if they are connected
-    const principal = window.ic.plug.agent ? await window.ic.plug.agent.getPrincipal() : null;
+    const principal = window.ic.plug.agent
+      ? await window.ic.plug.agent.getPrincipal()
+      : null;
     if (principal) {
       console.log("User principal fetched successfully:", principal.toString());
       setPrincipal(principal.toString());
@@ -73,7 +76,10 @@ function App() {
             const principal = window.ic.plug.agent.getPrincipal(); //get user identity
 
             if (principal) {
-              console.log("User principal fetched successfully:", principal.toString());
+              console.log(
+                "User principal fetched successfully:",
+                principal.toString()
+              );
               setPrincipal(principal.toString());
               setIsConnected(true); // Update the connection status
             } else {
@@ -95,6 +101,10 @@ function App() {
         <button type="submit">Click Me!</button>
       </form>
       <section id="greeting">{greeting}</section>
+      <body>
+        <Button>Button</Button>
+        <h1 class="text-3xl font-bold underline">test tailwind!</h1>
+      </body>
     </main>
   );
 }
