@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { futura_backend } from "declarations/futura_backend";
 import PlugConnect from "@psychedelic/plug-connect";
+import MemoryForm from "./components/MemoryForm";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -84,6 +85,7 @@ function App() {
         <>
           <button disabled={true}>Connected to Plug</button>
           <button onClick={handleDisconnect}>Disconnect</button>
+          <MemoryForm />
         </>
       )}
 
