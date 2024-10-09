@@ -16,6 +16,10 @@
     "src/Futura_frontend"
   ],
   "dependencies": {
-    "@psychedelic/plug-connect": "^0.2.0"
+    "@dfinity/agent": "^2.1.2",
+    "@dfinity/candid": "^2.1.2",
+    "@dfinity/principal": "^2.1.2",
+    "@psychedelic/plug-connect": "^0.1.4",
+    "vite": "^5.4.8"
   }
 }

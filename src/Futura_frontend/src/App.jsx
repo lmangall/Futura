@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Futura_backend } from 'declarations/Futura_backend';
+import { useState } from "react";
+import { Futura_backend } from "declarations/Futura_backend";
+import PlugConnect from "@psychedelic/plug-connect";
 
 function App() {
-  const [greeting, setGreeting] = useState('');
+  const [greeting, setGreeting] = useState("");
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -18,6 +19,10 @@ function App() {
       <img src="/logo2.svg" alt="DFINITY logo" />
       <br />
       <br />
+      <PlugConnect
+        whitelist={["canister-id"]}
+        onConnectCallback={() => console.log("Some callback")}
+      />
       <form action="#" onSubmit={handleSubmit}>
         <label htmlFor="name">Enter your name: &nbsp;</label>
         <input id="name" alt="Name" type="text" />
