@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "Futura_backend": {
+      "candid": "src/Futura_backend/Futura_backend.did",
+      "package": "Futura_backend",
+      "type": "rust"
+    },
+    "Futura_frontend": {
+      "dependencies": [
+        "Futura_backend"
+      ],
+      "source": [
+        "src/Futura_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "Futura_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
