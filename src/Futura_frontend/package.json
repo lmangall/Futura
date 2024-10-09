@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "setup": "npm i && dfx canister create Futura_backend && dfx generate Futura_backend && dfx deploy",
+    "dev": "vite --port 3000",
     "start": "vite --port 3000",
     "prebuild": "dfx generate",
     "build": "tsc && vite build",
