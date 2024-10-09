@@ -99,3 +99,11 @@ fn retrieve_memory() -> Option<String> {
 - **Update Functions** (`#[ic_cdk::update]`): These modify state but are slower and cost cycles.
 - **Principal IDs**: Each user is identified by a **Principal**, which is like a unique user ID in ICP.
 - **Storage**: The data (memories) are stored in a `HashMap`, where each user's memory is mapped to their Principal ID.
+
+### Futura_backend.did
+
+The `Futura_backend.did` file defines the Candid interface for the `futura_backend` canister. Candid is a serialization format developed for the Internet Computer that allows different programs, potentially written in different languages, to interact with canisters in a standardized manner. This interface is crucial because it specifies the types and methods available in the `futura_backend` canister, enabling clients to send correctly formatted requests and interpret responses.
+
+In our project, the `.did` file exposes the methods such as `store_memory` and `retrieve_memory`, defining their input and output types. This ensures that external services or command-line tools (like `dfx canister call`) can properly interact with the canister's functionality. The absence of this file earlier caused issues when trying to call the canister functions, as the system could not infer the types of the inputs without a defined interface. Once the `Futura_backend.did` file was created, it provided the necessary service description to make calls to the canister correctly, facilitating operations like memory storage and retrieval.
+
+The `.did` file acts as a formal contract between the canister and its clients, ensuring compatibility and smooth interaction.
