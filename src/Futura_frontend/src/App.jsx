@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Futura_backend } from "declarations/Futura_backend";
+import { futura_backend } from "declarations/futura_backend";
 import PlugConnect from "@psychedelic/plug-connect";
 
 function App() {
