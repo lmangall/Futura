@@ -20,9 +20,23 @@ function App() {
       <br />
       <br />
       <PlugConnect
-        whitelist={["canister-id"]}
-        onConnectCallback={() => console.log("Some callback")}
+        whitelist={[process.env.CANISTER_ID_FUTURA_BACKEND]}
+        onConnectCallback={() => {
+          console.log("PlugConnect onConnectCallback triggered."); // Log when the callback is triggered
+
+          const principal = window.ic.plug.agent.getPrincipal(); //get user identity
+
+          if (principal) {
+            console.log(
+              "User principal fetched successfully:",
+              principal.toString()
+            );
+          } else {
+            console.log("Failed to fetch user principal.");
+          }
+        }}
       />
+
       <form action="#" onSubmit={handleSubmit}>
         <label htmlFor="name">Enter your name: &nbsp;</label>
         <input id="name" alt="Name" type="text" />
