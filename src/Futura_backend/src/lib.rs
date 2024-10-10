@@ -47,6 +47,10 @@ struct Metadata {
 	visibility: Option<Vec<Principal>>.
 }
 
+	  /* TODO: Consider size limitations for large image data. Since images can be large,
+     we may need to implement chunking or compression to ensure the serialized data
+     fits within the limits of stable memory.
+*/
 
 // Serialize and store the state before upgrading
 #[pre_upgrade]
@@ -65,14 +69,17 @@ fn post_upgrade() {
     *storage = deserialized_storage;
 }
 
+/*
+TODO: Consider handling large images more efficiently.
+For example, add image compression or splitting large images into chunks.
+This will help prevent issues with memory usage or storage limitations, especially as images could be large.
+*/
 
 // Function to store a memory
 #[ic_cdk::update]
 fn store_memory(memory: String) {
 	let caller = ic_cdk::caller();
-	let memory = Memory { memory };
-
-	// let mut storage = storage::get_mut::<MemoriesStorage>();
+	let memory = Memory { text, images };
 	let mut storage = MEMORY_STORAGE.lock().unwrap();
 	storage.insert(caller, memory);
 }
@@ -81,7 +88,6 @@ fn store_memory(memory: String) {
 #[ic_cdk::query]
 fn retrieve_memory() -> Option<String> {
 	let caller = ic_cdk::caller();
-	// let storage = storage::get::<MemoriesStorage>();
 	let storage = MEMORY_STORAGE.lock().unwrap();
-	storage.get(&caller).map(|memory| memory.memory.clone())
+	storage.get(&caller).cloned()
 }
