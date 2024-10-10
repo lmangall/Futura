@@ -1,7 +1,7 @@
 
 type Memory = record {
-    texts: vec Text;
-    images: vec Image;
+    texts: opt vec Text;
+    images: opt vec Image;
 };
 
 type Text = record {

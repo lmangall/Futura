@@ -18,8 +18,8 @@ fn greet(name: String) -> String {
 // Define a struct for memory
 #[derive(Clone, Serialize, Deserialize, CandidType)]
 struct Memory {
-    texts: Vec<Text>,
-    images: Vec<Image>,
+    texts: Option<Vec<Text>>,   // Make texts optional
+    images: Option<Vec<Image>>, // Make images optional
 }
 
 #[derive(Clone, Serialize, Deserialize, CandidType)]
