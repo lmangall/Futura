@@ -2,6 +2,9 @@ use std::collections::HashMap;
 use candid::Principal; // Use Principal from candid crate
 use lazy_static::lazy_static; // For creating a static, global storage
 use std::sync::Mutex; // Mutex for thread safety in global storage
+use ic_cdk::storage; // Storage for the canister
+use ic_cdk_macros::{pre_upgrade, post_upgrade}; // Macros for upgrade functions
+use serde::{Deserialize, Serialize}; // For serializing and deserializing data
 
 
 lazy_static! {
@@ -15,11 +18,27 @@ fn greet(name: String) -> String {
 }
 
 // Define a struct for memory
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)] // Derive Serialize and Deserialize for persistence
 struct Memory {
-	memory: String, 
+    memory: String,
 }
 
+// Serialize and store the state before upgrading
+#[pre_upgrade]
+fn pre_upgrade() {
+    let storage = MEMORY_STORAGE.lock().unwrap();
+    let serialized_data = serde_json::to_vec(&*storage).expect("Failed to serialize memory storage");
+    storage::stable_save((serialized_data,)).expect("Failed to save to stable memory");
+}
+
+// Deserialize and restore the state after upgrading
+#[post_upgrade]
+fn post_upgrade() {
+    let (serialized_data,): (Vec<u8>,) = ic_cdk::storage::stable_restore().expect("Failed to restore from stable memory");
+    let deserialized_storage: HashMap<Principal, Memory> = serde_json::from_slice(&serialized_data).expect("Failed to deserialize memory storage");
+    let mut storage = MEMORY_STORAGE.lock().unwrap();
+    *storage = deserialized_storage;
+}
 
 
 // Function to store a memory
