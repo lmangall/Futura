@@ -77,14 +77,22 @@ This will help prevent issues with memory usage or storage limitations, especial
 */
 
 // Function to store a memory
-#[ic_cdk::update]
-fn store_memory(texts: Vec<Text>, images: Vec<Image>) {
-    let caller = ic_cdk::caller();
-    let memory = Memory {
-        texts: Some(texts),   // Wrap texts in Some
-        images: Some(images), // Wrap images in Some
-    };
+// #[ic_cdk::update]
+// fn store_memory(texts: Vec<Text>, images: Vec<Image>) {
+//     let caller = ic_cdk::caller();
+//     let memory = Memory {
+//         texts: Some(texts),   // Wrap texts in Some
+//         images: Some(images), // Wrap images in Some
+//     };
 
+//     let mut storage = MEMORY_STORAGE.lock().unwrap();
+//     storage.insert(caller, memory);
+// }
+
+// Claude version
+#[ic_cdk::update]
+fn store_memory(memory: Memory) {
+    let caller = ic_cdk::caller();
     let mut storage = MEMORY_STORAGE.lock().unwrap();
     storage.insert(caller, memory);
 }
