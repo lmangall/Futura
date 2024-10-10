@@ -2,7 +2,7 @@
     "compilerOptions": {
         "strict": true,
         "baseUrl": ".",
-
+        "jsx": "react", 
         "paths": {
             "@/*": ["src/Futura_frontend/*"]},
         "target": "ES2020",

@@ -99,3 +99,47 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+.principal-button {
+  display: flex;
+  align-items: center;
+  padding: 10px 10px;
+  background-color: #4CAF50; /* Change to your preferred color */
+  color: white;
+  border: none;
+  border-radius: 25px; /* Rounded corners */
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 20px; /* Space above the button */
+}
+
+.principal-button:hover {
+  background-color: #45a049; /* Darker shade on hover */
+}
+
+.logo {
+  width: 30px; /* Adjust the size of the logo */
+  height: 30px; /* Keep it circular */
+  border-radius: 50%; /* Make the logo round */
+  margin-right: 10px; /* Space between logo and principal ID */
+}
+
+.principal-id {
+  font-weight: bold; /* Make the principal ID bold */
+}
+
+.principal-button button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-left: 10px;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.principal-button button:hover {
+  color: #ff6b6b; /* Hover color for logout */
+}

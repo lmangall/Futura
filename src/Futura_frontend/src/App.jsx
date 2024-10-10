@@ -56,6 +56,13 @@ function App() {
     console.log("Disconnected from Plug");
   }
 
+  const shortenPrincipal = (principal) => {
+    if (!principal) return "";
+    const start = principal.slice(0, 3); // Get first 3 characters
+    const end = principal.slice(-3); // Get last 3 characters
+    return `${start}...${end}`;
+  };
+
   return (
     <Router>
       <Routes>
@@ -88,8 +95,14 @@ function App() {
                 />
               ) : (
                 <>
-                  <Button disabled={true}>Connected to Plug</Button>
-                  <Button onClick={handleDisconnect}>Disconnect</Button>
+                  <Button className="principal-Button">
+                    <img src="/Pluglogo.svg" alt="PLug logo" className="logo" />
+
+                    <span className="principal-id">
+                      {shortenPrincipal(principal.toString())}
+                    </span>
+                    <Button onClick={handleDisconnect}>logout</Button>
+                  </Button>
                   <MemoryForm />
                 </>
               )}
