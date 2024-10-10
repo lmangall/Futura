@@ -18,10 +18,35 @@ fn greet(name: String) -> String {
 }
 
 // Define a struct for memory
-#[derive(Clone, Serialize, Deserialize)] // Derive Serialize and Deserialize for persistence
+#[derive(Clone, Serialize, Deserialize)]
 struct Memory {
-    memory: String,
+    text: Vec<Text>,    
+    images: Vec<Image>, 
 }
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Text {
+	content: String,
+	metadata: Option<Metadata>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Image {
+	content: Vec<u8>,
+	metadata: Option<Metadata>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Metadata {
+	created_at: String,
+	updated_at: String,
+	description: String,
+	place: Option<String>,
+	tags: Option<Vec<String>>,
+	people: Option<Vec<String>>,
+	visibility: Option<Vec<Principal>>.
+}
+
 
 // Serialize and store the state before upgrading
 #[pre_upgrade]
