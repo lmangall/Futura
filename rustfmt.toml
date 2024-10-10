@@ -1,0 +1,2 @@
+max_width = 100            # Set the maximum line width to 100 characters
+use_small_heuristics = "Off"  # Disable rustfmt's heuristics for special cases
