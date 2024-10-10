@@ -6,14 +6,25 @@ CANDID_LOG_FILE="test_image_candid.log"
 ERROR_LOG_FILE="test_image_error.log"
 CANISTER_ID="a4tbr-q4aaa-aaaaa-qaafq-cai"
 
+echo "" > "$CANDID_LOG_FILE"
+echo "" > "$ERROR_LOG_FILE"
+
 # Read the image as raw binary and encode it as a hex string
-IMAGE_BINARY=$(xxd -p "$IMAGE_PATH" | tr -d '\n')
+# IMAGE_BINARY=$(xxd -p "$IMAGE_PATH" | tr -d '\n')
+IMAGE_BINARY="89504e470d"  # This is a part of a PNG file header
+
+# Constructing a sample text record
+TEXT_RECORD="record { content = \"Sample text\"; metadata = opt record { description = opt \"Text description\"; } }"; 
 
 # Construct the Candid argument
-CANDID_ARGUMENT="(record { texts = vec {}; images = vec { record { content = blob \"$IMAGE_BINARY\"; metadata = opt record { description = opt \"Sample Image\"; date = opt \"2024-10-10\"; place = opt \"Berlin\"; tags = opt vec { \"test\"; \"image\" }; visibility = opt vec {}; people = opt vec {} } } } })"
+# CANDID_ARGUMENT="(record { texts = opt vec {}; images = opt vec { record { content = blob \"$IMAGE_BINARY\"; metadata = opt record { description = opt \"Sample Image\"; date = opt \"2024-10-10\"; place = opt \"Berlin\"; tags = opt vec { \"test\"; \"image\" }; visibility = opt vec {}; people = opt vec {}; } } } })"
 
-# Construct the Candid argument
-CANDID_ARGUMENT="(record { texts = vec {}; images = vec { record { content = blob \"$IMAGE_BINARY\"; metadata = opt record { description = opt \"Sample Image\"; date = opt \"2024-10-10\"; place = opt \"Berlin\"; tags = opt vec { \"test\"; \"image\" }; visibility = opt vec {}; people = opt vec {} } } } })"
+# Construct empty Candid argument
+CANDID_ARGUMENT="(record { texts = opt vec {}; images = opt vec {}; })"
+
+
+
+
 
 
 # Log the Candid argument for review

@@ -16,10 +16,11 @@ fn greet(name: String) -> String {
 }
 
 // Define a struct for memory
+
 #[derive(Clone, Serialize, Deserialize, CandidType)]
 struct Memory {
-    texts: Option<Vec<Text>>,   // Make texts optional
-    images: Option<Vec<Image>>, // Make images optional
+    texts: Option<Vec<Text>>,   // Change to Option to allow for optionality
+    images: Option<Vec<Image>>, // Change to Option to allow for optionality
 }
 
 #[derive(Clone, Serialize, Deserialize, CandidType)]
@@ -80,8 +81,8 @@ This will help prevent issues with memory usage or storage limitations, especial
 fn store_memory(texts: Vec<Text>, images: Vec<Image>) {
     let caller = ic_cdk::caller();
     let memory = Memory {
-        texts,
-        images,
+        texts: Some(texts),   // Wrap texts in Some
+        images: Some(images), // Wrap images in Some
     };
 
     let mut storage = MEMORY_STORAGE.lock().unwrap();
