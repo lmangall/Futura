@@ -36,7 +36,8 @@ struct Image {
 
 #[derive(Clone, Serialize, Deserialize, CandidType)]
 struct Metadata {
-    description: String,
+    description: Option<String>, // Updated to Option
+    date: Option<String>,        // Added date field
     place: Option<String>,
     tags: Option<Vec<String>>,
     people: Option<Vec<String>>,

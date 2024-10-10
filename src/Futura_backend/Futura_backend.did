@@ -10,7 +10,7 @@ type Text = record {
 };
 
 type Image = record {
-    data: blob;
+    content: blob;
     metadata: opt Metadata;
 };
 
@@ -20,6 +20,7 @@ type Metadata = record {
     place: opt text;
     tags: opt vec text;
     visibility: opt vec principal;
+	people: opt vec text;
 };
 
 service : {
