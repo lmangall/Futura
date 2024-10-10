@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom"; // Import Router and Route
 import { futura_backend } from "declarations/futura_backend";
 import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
 import { Button } from "./components/ui/button";
+import Dashboard from "./components/Dashborad";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -63,49 +65,64 @@ function App() {
   }
 
   return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      {!isConnected ? (
-        <PlugConnect
-          whitelist={[process.env.CANISTER_ID_FUTURA_BACKEND]}
-          onConnectCallback={() => {
-            console.log("PlugConnect onConnectCallback triggered."); // Log when the callback is triggered
+    <Router>
+      <main>
+        <img src="/logo2.svg" alt="DFINITY logo" />
+        <br />
+        <br />
+        {!isConnected ? (
+          <PlugConnect
+            whitelist={[process.env.VITE_CANISTER_ID_FUTURA_BACKEND]}
+            onConnectCallback={() => {
+              console.log("PlugConnect onConnectCallback triggered."); // Log when the callback is triggered
 
-            const principal = window.ic.plug.agent.getPrincipal(); //get user identity
+              const principal = window.ic.plug.agent.getPrincipal(); // get user identity
 
-            if (principal) {
-              console.log(
-                "User principal fetched successfully:",
-                principal.toString()
-              );
-              setPrincipal(principal.toString());
-              setIsConnected(true); // Update the connection status
-            } else {
-              console.log("Failed to fetch user principal.");
-            }
-          }}
-        />
-      ) : (
-        <>
-          <button disabled={true}>Connected to Plug</button>
-          <button onClick={handleDisconnect}>Disconnect</button>
-          <MemoryForm />
-        </>
-      )}
+              if (principal) {
+                console.log(
+                  "User principal fetched successfully:",
+                  principal.toString()
+                );
+                setPrincipal(principal.toString());
+                setIsConnected(true); // Update the connection status
+              } else {
+                console.log("Failed to fetch user principal.");
+              }
+            }}
+          />
+        ) : (
+          <>
+            <Button disabled={true}>Connected to Plug</Button>
+            <Button onClick={handleDisconnect}>Disconnect</Button>
+            <MemoryForm />
+          </>
+        )}
 
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-      <body>
+        <form action="#" onSubmit={handleSubmit}>
+          <label htmlFor="name">Enter your name: &nbsp;</label>
+          <input id="name" alt="Name" type="text" />
+          <Button type="submit">Click Me!</Button>
+        </form>
+        <section id="greeting">{greeting}</section>
+
+        {/* Button to navigate to the Dashboard */}
+        <div>
+          <Button>
+            <Link to="/dashboard">Go to Dashboard</Link>
+          </Button>
+        </div>
+
         <Button>Button</Button>
-        <h1 class="text-3xl font-bold underline">test tailwind!</h1>
-      </body>
-    </main>
+        <h1 className="text-3xl font-bold underline">test tailwind!</h1>
+      </main>
+
+      {/* Define the routes for the application */}
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />{" "}
+        {/* Route for Dashboard */}
+        {/* Add other routes here if needed */}
+      </Routes>
+    </Router>
   );
 }
 

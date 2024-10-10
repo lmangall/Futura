@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "strict": true,
+        "baseUrl": ".",
+
         "paths": {
             "@/*": ["src/Futura_frontend/*"]},
         "target": "ES2020",
