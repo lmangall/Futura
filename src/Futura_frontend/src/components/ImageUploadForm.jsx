@@ -1,8 +1,36 @@
 import React, { useState } from "react";
+import { Principal } from "@dfinity/principal";
+import { IDL } from "@dfinity/candid";
+import { futura_backend } from "declarations/futura_backend";
+
+const Metadata = IDL.Record({
+  description: IDL.Opt(IDL.Text),
+  date: IDL.Opt(IDL.Text),
+  place: IDL.Opt(IDL.Text),
+  tags: IDL.Opt(IDL.Vec(IDL.Text)),
+  visibility: IDL.Opt(IDL.Vec(IDL.Principal)),
+  people: IDL.Opt(IDL.Vec(IDL.Text)),
+});
+
+const TextType = IDL.Record({
+  content: IDL.Text,
+  metadata: IDL.Opt(Metadata),
+});
+
+const ImageType = IDL.Record({
+  content: IDL.Vec(IDL.Nat8),
+  metadata: IDL.Opt(Metadata),
+});
+
+const MemoryType = IDL.Record({
+  texts: IDL.Opt(IDL.Vec(TextType)),
+  images: IDL.Opt(IDL.Vec(ImageType)),
+});
 
 const ImageUpload = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [response, setResponse] = useState("");
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -12,32 +40,66 @@ const ImageUpload = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!selectedImage) {
       alert("Please select an image to upload");
       return;
     }
+    try {
+      // Read the image file as an ArrayBuffer
+      const imageArrayBuffer = await selectedImage.arrayBuffer();
+      const imageUint8Array = new Uint8Array(imageArrayBuffer);
 
-    // Handle the file upload here
-    const formData = new FormData();
-    formData.append("image", selectedImage);
+      // Construct the data object
+      const data = {
+        texts: [
+          {
+            content: "Sample text",
+            metadata: [
+              {
+                // Wrap in array for Opt type
+                description: ["Text description"],
+                date: ["2024-10-10"],
+                place: ["Test Location"],
+                tags: [["test", "text"]],
+                visibility: [],
+                people: [],
+              },
+            ],
+          },
+        ],
+        images: [
+          {
+            content: Array.from(imageUint8Array), // Convert Uint8Array to regular array
+            metadata: [
+              {
+                // Wrap in array for Opt type
+                description: ["Sample Image"],
+                date: ["2024-10-10"],
+                place: ["Berlin"],
+                tags: [["test", "image"]],
+                visibility: [],
+                people: [],
+              },
+            ],
+          },
+        ],
+      };
 
-    // Example upload using fetch
-    fetch("/upload", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      // Encode the data using IDL
+      const encodedArguments = IDL.encode([MemoryType], [data]);
+
+      // Call the 'store_memory' function on the backend canister
+      await futura_backend.store_memory(encodedArguments);
+
+      setResponse("Image uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setResponse("Failed to upload image.");
+    }
   };
-
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mt-8">
       <h2 className="text-2xl font-bold text-center mb-6">Image Upload</h2>
@@ -60,6 +122,7 @@ const ImageUpload = () => {
           Upload Image
         </button>
       </form>
+      <p className="mt-4 text-center text-gray-700">{response}</p>
     </div>
   );
 };
