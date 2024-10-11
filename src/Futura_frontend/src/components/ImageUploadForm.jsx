@@ -39,16 +39,24 @@ const ImageUpload = () => {
   };
 
   return (
-    <div>
-      <h2>Image Upload</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="file" accept="image/*" onChange={handleImageChange} />
+    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mt-8">
+      <h2 className="text-2xl font-bold text-center mb-6">Image Upload</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+        />
         {imagePreview && (
-          <div>
-            <img src={imagePreview} alt="Preview" style={{ width: "300px", marginTop: "10px" }} />
+          <div className="mt-4">
+            <img src={imagePreview} alt="Preview" className="w-full h-auto rounded-lg shadow-md" />
           </div>
         )}
-        <button type="submit" style={{ marginTop: "10px" }}>
+        <button
+          type="submit"
+          className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition-colors"
+        >
           Upload Image
         </button>
       </form>
