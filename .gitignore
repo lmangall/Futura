@@ -22,6 +22,7 @@ dist/
 
 # environment variables
 .env
+
 # Python virtual environment in the tests directory
 tests/venv/
 
@@ -32,5 +33,19 @@ tests/venv/
 /tests/test_image_candid.log
 /tests/output_image.png
 
+# Rust and Node.js lock files
 Cargo.lock
 package-lock.json
+
+# TypeScript build info files
+*.tsbuildinfo
+
+# TypeScript declaration files (generated)
+vite.config.d.ts
+
+# Vite build outputs
+.vite/
+out/
+
+# Log files
+*.log
