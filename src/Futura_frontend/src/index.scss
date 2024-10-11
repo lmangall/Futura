@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   font-family: sans-serif;
   font-size: 1.5rem;
@@ -40,7 +44,7 @@ button[type="submit"] {
   display: flex;
   align-items: center;
   padding: 10px 10px;
-  background-color: #4CAF50; /* Change to your preferred color */
+  background-color: #4caf50; /* Change to your preferred color */
   color: white;
   border: none;
   border-radius: 25px; /* Rounded corners */
