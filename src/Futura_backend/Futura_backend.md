@@ -107,3 +107,151 @@ The `Futura_backend.did` file defines the Candid interface for the `futura_backe
 In our project, the `.did` file exposes the methods such as `store_memory` and `retrieve_memory`, defining their input and output types. This ensures that external services or command-line tools (like `dfx canister call`) can properly interact with the canister's functionality. The absence of this file earlier caused issues when trying to call the canister functions, as the system could not infer the types of the inputs without a defined interface. Once the `Futura_backend.did` file was created, it provided the necessary service description to make calls to the canister correctly, facilitating operations like memory storage and retrieval.
 
 The `.did` file acts as a formal contract between the canister and its clients, ensuring compatibility and smooth interaction.
+
+### Q&A about adding images
+
+### 1. Why use both `candid::Deserialize` and `serde::Deserialize`?
+
+Background: In our codebase we had already the serde Deserialize method for the upgrades hook.
+
+You can use **either** `serde::Deserialize` or `candid::Deserialize`, but they serve slightly different purposes:
+
+- **`serde::Deserialize`** is used for serializing and deserializing Rust data types into formats like JSON, which is useful when you're working with storage mechanisms that need data persistence.
+- **`candid::Deserialize`** (from the `Candid` library) is used for serializing/deserializing data in the **Candid** format. This is critical when communicating with the **Internet Computer** (IC), where Candid is used as the interface description language between canisters and frontends.
+
+If you only need to serialize for storage and not use the Candid interface, you can stick to `serde::Deserialize`. However, since you’re working with the IC and using Candid to expose your service, you should ensure your structs are compatible with Candid. You can likely use both `Serialize` and `Deserialize` from Serde for stable memory and Candid for inter-canister or frontend communication.
+
+### 2. Why use `ic_cdk::Principal`?
+
+`Principal` represents an identity on the IC, meaning **every user or canister** has a unique Principal. This is how you identify which user is interacting with your canister and store data specific to that user. When storing or retrieving memories (or any personalized data), you can use the `Principal` to know **which user owns** which piece of data.
+
+In your case:
+
+- When a user stores a memory, it is tied to their `Principal`.
+- When they retrieve a memory, you use their `Principal` to fetch their specific data.
+
+### 3. Should memory hold an array of images or just one image?
+
+It depends on the use case:
+
+- **Array of images**: If you expect a memory to potentially have multiple images (like a photo album or collection), then it makes sense to store an array of `Image` structs inside each `Memory`. This gives flexibility and scalability.
+
+  For example:
+
+  ```rust
+  struct Memory {
+      memory: Option<String>,
+      images: Vec<Image>, // Holds multiple images
+  }
+  ```
+
+- **Single image**: If a memory is generally expected to hold just one image, then you can start with a single image field. You can always change this later if needed, but starting simple is often best.
+
+### 4. Metadata: What other fields could be useful?
+
+For **metadata**, you can add fields that describe the context around the image and enrich the memory. Some potential fields are:
+
+- **Description**: A text field that gives details about the image.
+- **Date/Time**: When the image was taken or uploaded.
+- **Location**: Where the image was taken (either as a string or coordinates).
+- **Tags**: Custom tags that users might want to add for categorization or easy retrieval later.
+- **Device Info**: Information about the camera or device that captured the image (optional).
+
+For example:
+
+```rust
+struct Metadata {
+    description: Option<String>, // Optional description for the image
+    date: Option<String>,        // When the image was captured
+    place: Option<String>,       // Location data, either as a string or coordinates
+    tags: Option<Vec<String>>,   // Tags for easy search or filtering
+}
+```
+
+You can start with simple fields like `description`, `date`, and `place` and then expand later as your service grows.
+
+### Updated Code Example:
+
+Here’s an updated structure reflecting the idea of holding multiple images with metadata:
+
+```rust
+use std::collections::HashMap;
+use candid::Principal;
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+use serde::{Deserialize, Serialize};
+
+lazy_static! {
+    static ref MEMORY_STORAGE: Mutex<HashMap<Principal, Vec<Memory>>> = Mutex::new(HashMap::new());
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Memory {
+    memory: Option<String>,
+    images: Vec<Image>, // Store multiple images
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Image {
+    data: Vec<u8>,         // Binary data for the image
+    metadata: Metadata,    // Associated metadata
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Metadata {
+    description: Option<String>, // Image description
+    date: Option<String>,        // Date when the image was captured
+    place: Option<String>,       // Location information
+    tags: Option<Vec<String>>,   // Tags for categorization
+}
+
+// Serialize and store the state before upgrading
+#[pre_upgrade]
+fn pre_upgrade() {
+    let storage = MEMORY_STORAGE.lock().unwrap();
+    let serialized_data = serde_json::to_vec(&*storage).expect("Failed to serialize memory storage");
+    ic_cdk::storage::stable_save((serialized_data,)).expect("Failed to save to stable memory");
+}
+
+// Deserialize and restore the state after upgrading
+#[post_upgrade]
+fn post_upgrade() {
+    let (serialized_data,): (Vec<u8>,) = ic_cdk::storage::stable_restore().expect("Failed to restore from stable memory");
+    let deserialized_storage: HashMap<Principal, Vec<Memory>> = serde_json::from_slice(&serialized_data).expect("Failed to deserialize memory storage");
+    let mut storage = MEMORY_STORAGE.lock().unwrap();
+    *storage = deserialized_storage;
+}
+
+#[ic_cdk::update]
+fn store_memory(text: Option<String>, image_data: Option<Vec<u8>>, metadata: Option<Metadata>) {
+    let caller = ic_cdk::caller();
+
+    let new_memory = Memory {
+        memory: text,
+        images: vec![Image {
+            data: image_data.unwrap_or_default(),
+            metadata: metadata.unwrap_or_default(),
+        }],
+    };
+
+    let mut storage = MEMORY_STORAGE.lock().unwrap();
+    storage.entry(caller).or_insert(Vec::new()).push(new_memory);
+}
+
+#[ic_cdk::query]
+fn retrieve_memory() -> Option<Vec<Memory>> {
+    let caller = ic_cdk::caller();
+    let storage = MEMORY_STORAGE.lock().unwrap();
+    storage.get(&caller).cloned()
+}
+```
+
+This updated code allows you to store multiple images in a memory, each with associated metadata.
+
+### Next Steps:
+
+1. **Implement Frontend**: You will need to adjust the frontend to upload images and send them in the appropriate format to the backend.
+2. **Testing**: Run tests on the backend to ensure the memory storage and retrieval are working, especially with images.
+3. **Future Considerations**: Depending on feedback and usage, you can further extend the metadata fields or the image storage mechanism.
+
+Let me know if you want to dive into specific details, such as file uploads or storage mechanisms!

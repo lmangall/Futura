@@ -1,5 +1,30 @@
+
+type Memory = record {
+    texts: opt vec Text;
+    images: opt vec Image;
+};
+
+type Text = record {
+    content: text;
+    metadata: opt Metadata;
+};
+
+type Image = record {
+    content: blob;
+    metadata: opt Metadata;
+};
+
+type Metadata = record {
+    description: opt text;
+    date: opt text;
+    place: opt text;
+    tags: opt vec text;
+    visibility: opt vec principal;
+	people: opt vec text;
+};
+
 service : {
     "greet": (text) -> (text) query;
-    "store_memory": (text) -> ();
-    "retrieve_memory": () -> (opt text) query;
-}
+    "store_memory": (Memory) -> ();
+    "retrieve_memory": () -> (opt Memory) query;
+};

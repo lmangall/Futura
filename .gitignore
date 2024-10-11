@@ -19,7 +19,15 @@ target/
 # frontend code
 node_modules/
 dist/
-.svelte-kit/
 
 # environment variables
 .env
+# Python virtual environment in the tests directory
+tests/venv/
+
+# Test files
+/tests/test_image_error.log
+/tests/encoded_image.txt
+/tests/store_output.log
+/tests/test_image_candid.log
+/tests/output_image.png
