@@ -27,15 +27,34 @@ function MemoryForm() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleStoreMemory}>
-        <label htmlFor="memory">Enter your memory:</label>
-        <input type="text" id="memory" value={memory} onChange={(e) => setMemory(e.target.value)} />
-        <button type="submit">Store Memory</button>
+    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+      <form onSubmit={handleStoreMemory} className="space-y-4">
+        <label htmlFor="memory" className="block text-lg font-medium text-gray-700">
+          Enter your memory:
+        </label>
+        <input
+          type="text"
+          id="memory"
+          value={memory}
+          onChange={(e) => setMemory(e.target.value)}
+          className="block w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="Type your memory here"
+        />
+        <button
+          type="submit"
+          className="w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+        >
+          Store Memory
+        </button>
       </form>
-      <br />
-      <button onClick={handleRetrieveMemory}>Retrieve Memory</button>
-      <p>{response}</p>
+      <hr className="my-6" />
+      <button
+        onClick={handleRetrieveMemory}
+        className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+      >
+        Retrieve Memory
+      </button>
+      <p className="mt-4 text-center text-gray-700">{response}</p>
     </div>
   );
 }
