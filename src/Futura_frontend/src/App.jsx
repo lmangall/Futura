@@ -3,6 +3,7 @@ import { futura_backend } from "declarations/futura_backend";
 import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
 import ImageUploadForm from "./components/ImageUploadForm";
+import Greeting from "./components/Greeting";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -104,7 +105,8 @@ function App() {
           <MemoryForm />
         </>
       )}
-      <form onSubmit={handleSubmit} className="flex justify-center gap-2 flex-wrap max-w-[40vw] mx-auto items-baseline">
+      <Greeting />
+      {/* <form onSubmit={handleSubmit} className="flex justify-center gap-2 flex-wrap max-w-[40vw] mx-auto items-baseline">
         <label htmlFor="name" className="text-lg font-semibold">
           Enter your name: &nbsp;
         </label>
@@ -118,12 +120,12 @@ function App() {
           Click Me!
         </button>
       </form>
-      <ImageUploadForm />
       {greeting && (
         <section id="greeting" className="mt-4 p-4 mx-auto border border-gray-900 text-center">
           {greeting}
         </section>
-      )}
+      )} */}
+      <ImageUploadForm />
     </main>
   );
 }

@@ -27,7 +27,7 @@ function MemoryForm() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mt-7">
       <form onSubmit={handleStoreMemory} className="space-y-4">
         <label htmlFor="memory" className="block text-lg font-medium text-gray-700">
           Enter your memory:
