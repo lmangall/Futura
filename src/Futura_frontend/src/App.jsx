@@ -27,7 +27,9 @@ function App() {
     }
 
     // Get the user's principal if they are connected
-    const principal = window.ic.plug.agent ? await window.ic.plug.agent.getPrincipal() : null;
+    const principal = window.ic.plug.agent
+      ? await window.ic.plug.agent.getPrincipal()
+      : null;
     if (principal) {
       console.log("User principal fetched successfully:", principal.toString());
       setPrincipal(principal.toString());
@@ -73,7 +75,10 @@ function App() {
             const principal = window.ic.plug.agent.getPrincipal(); //get user identity
 
             if (principal) {
-              console.log("User principal fetched successfully:", principal.toString());
+              console.log(
+                "User principal fetched successfully:",
+                principal.toString()
+              );
               setPrincipal(principal.toString());
               setIsConnected(true); // Update the connection status
             } else {
@@ -95,6 +100,10 @@ function App() {
         <button type="submit">Click Me!</button>
       </form>
       <section id="greeting">{greeting}</section>
+      <h1 class="text-3xl font-bold underline bg-sky-500 hover:bg-sky-700">
+        Hello world!
+      </h1>
+      <button class="bg-sky-500 hover:bg-sky-700 ...">Save changes</button>
     </main>
   );
 }
