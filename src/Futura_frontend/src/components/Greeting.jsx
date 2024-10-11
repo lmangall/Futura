@@ -15,7 +15,7 @@ function Greeting() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mt-5">
       <form onSubmit={handleSubmit} className="space-y-4">
         <label htmlFor="name" className="block text-lg font-medium text-gray-700">
           Enter your name:
@@ -44,4 +44,4 @@ function Greeting() {
   );
 }
 
-export default GreetingForm;
+export default Greeting;

@@ -10,25 +10,20 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [principal, setPrincipal] = useState(null);
 
-  // Persistence check to ensure connection and agent are available
   const verifyConnectionAndAgent = async () => {
     const whitelist = [process.env.VITE_CANISTER_ID_FUTURA_BACKEND];
     const host = "https://mainnet.dfinity.network"; // Adjust the host if necessary
 
-    // Check if the user is still connected to Plug
     const connected = await window.ic.plug.isConnected();
 
     if (!connected) {
-      // If not connected, request connection again
       await window.ic.plug.requestConnect({ whitelist, host });
     }
 
-    // If connected, ensure the Plug agent is created
     if (connected && !window.ic.plug.agent) {
       await window.ic.plug.createAgent({ whitelist, host });
     }
 
-    // Get the user's principal if they are connected
     const principal = window.ic.plug.agent ? await window.ic.plug.agent.getPrincipal() : null;
     if (principal) {
       console.log("User principal fetched successfully:", principal.toString());
@@ -38,7 +33,6 @@ function App() {
   };
 
   useEffect(() => {
-    // Run the persistence check on component mount
     verifyConnectionAndAgent();
   }, []);
 
@@ -52,19 +46,16 @@ function App() {
   }
 
   function handleDisconnect() {
-    // Clear the Plug connection
     setPrincipal(null);
     setIsConnected(false);
-
-    // Optionally, clear the Plug agent (reset the window.ic.plug)
     window.ic.plug.agent = null;
     console.log("Disconnected from Plug");
   }
 
   const shortenPrincipal = (principal) => {
     if (!principal) return "";
-    const start = principal.slice(0, 3); // Get first 3 characters
-    const end = principal.slice(-3); // Get last 3 characters
+    const start = principal.slice(0, 3);
+    const end = principal.slice(-3);
     return `${start}...${end}`;
   };
 
@@ -77,14 +68,14 @@ function App() {
         <PlugConnect
           whitelist={[process.env.CANISTER_ID_FUTURA_BACKEND]}
           onConnectCallback={() => {
-            console.log("PlugConnect onConnectCallback triggered."); // Log when the callback is triggered
+            console.log("PlugConnect onConnectCallback triggered.");
 
-            const principal = window.ic.plug.agent.getPrincipal(); //get user identity
+            const principal = window.ic.plug.agent.getPrincipal();
 
             if (principal) {
               console.log("User principal fetched successfully:", principal.toString());
               setPrincipal(principal.toString());
-              setIsConnected(true); // Update the connection status
+              setIsConnected(true);
             } else {
               console.log("Failed to fetch user principal.");
             }
@@ -106,25 +97,6 @@ function App() {
         </>
       )}
       <Greeting />
-      {/* <form onSubmit={handleSubmit} className="flex justify-center gap-2 flex-wrap max-w-[40vw] mx-auto items-baseline">
-        <label htmlFor="name" className="text-lg font-semibold">
-          Enter your name: &nbsp;
-        </label>
-        <input
-          id="name"
-          alt="Name"
-          type="text"
-          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-        <button type="submit" className="px-5 py-2 mt-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-          Click Me!
-        </button>
-      </form>
-      {greeting && (
-        <section id="greeting" className="mt-4 p-4 mx-auto border border-gray-900 text-center">
-          {greeting}
-        </section>
-      )} */}
       <ImageUploadForm />
     </main>
   );
