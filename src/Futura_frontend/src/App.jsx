@@ -4,6 +4,8 @@ import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
 import ImageUploadForm from "./components/ImageUploadForm";
 import Greeting from "./components/Greeting";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CheckboxDemo } from "./components/CheckboxDemo";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -98,6 +100,11 @@ function App() {
       )}
       <Greeting />
       <ImageUploadForm />
+      <br />
+      <Checkbox />
+      <br />
+
+      <CheckboxDemo />
     </main>
   );
 }
