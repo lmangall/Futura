@@ -68,9 +68,9 @@ function App() {
   };
 
   return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
+    <main className="flex flex-col items-center p-6 bg-pink-100">
+      <img src="/logo2.svg" alt="DFINITY logo" className="max-w-[50vw] max-h-[25vw] block m-auto" />
+
       <br />
       {!isConnected ? (
         <PlugConnect
@@ -91,22 +91,39 @@ function App() {
         />
       ) : (
         <>
-          <button className="principal-button">
-            <img src="/Pluglogo.svg" alt="PLug logo" className="logo" />
-
-            <span className="principal-id">{shortenPrincipal(principal.toString())}</span>
-            <button onClick={handleDisconnect}>logout</button>
+          <button className="flex items-center p-3 bg-green-600 text-white rounded-full mt-5 transition-colors duration-300 hover:bg-green-700 cursor-pointer">
+            <img src="/Pluglogo.svg" alt="Plug logo" className="w-8 h-8 rounded-full mr-3" />
+            <span className="font-bold">{shortenPrincipal(principal.toString())}</span>
+            <button
+              onClick={handleDisconnect}
+              className="ml-3 bg-transparent border-none text-white cursor-pointer text-sm p-2 transition-colors hover:text-red-400"
+            >
+              Logout
+            </button>
           </button>
           <MemoryForm />
         </>
       )}
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
+      <form onSubmit={handleSubmit} className="flex justify-center gap-2 flex-wrap max-w-[40vw] mx-auto items-baseline">
+        <label htmlFor="name" className="text-lg font-semibold">
+          Enter your name: &nbsp;
+        </label>
+        <input
+          id="name"
+          alt="Name"
+          type="text"
+          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        <button type="submit" className="px-5 py-2 mt-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+          Click Me!
+        </button>
       </form>
       <ImageUploadForm />
-      <section id="greeting">{greeting}</section>
+      {greeting && (
+        <section id="greeting" className="mt-4 p-4 mx-auto border border-gray-900 text-center">
+          {greeting}
+        </section>
+      )}
     </main>
   );
 }
