@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { futura_backend } from "declarations/futura_backend";
 import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
+import ImageUploadForm from "./components/ImageUploadForm";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -60,7 +61,7 @@ function App() {
   }
 
   const shortenPrincipal = (principal) => {
-    if (!principal) return '';
+    if (!principal) return "";
     const start = principal.slice(0, 3); // Get first 3 characters
     const end = principal.slice(-3); // Get last 3 characters
     return `${start}...${end}`;
@@ -90,21 +91,21 @@ function App() {
         />
       ) : (
         <>
-        <button className="principal-button">
-          <img src="/Pluglogo.svg" alt="PLug logo" className="logo" />
+          <button className="principal-button">
+            <img src="/Pluglogo.svg" alt="PLug logo" className="logo" />
 
-          <span className="principal-id">{shortenPrincipal(principal.toString())}</span>
-          <button onClick={handleDisconnect}>logout</button>
-        </button>
+            <span className="principal-id">{shortenPrincipal(principal.toString())}</span>
+            <button onClick={handleDisconnect}>logout</button>
+          </button>
           <MemoryForm />
         </>
       )}
-
       <form action="#" onSubmit={handleSubmit}>
         <label htmlFor="name">Enter your name: &nbsp;</label>
         <input id="name" alt="Name" type="text" />
         <button type="submit">Click Me!</button>
       </form>
+      <ImageUploadForm />
       <section id="greeting">{greeting}</section>
     </main>
   );

@@ -1,10 +1,10 @@
 {
-  "name": "Futura_frontend",
+  "name": "futura_frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "setup": "npm i && dfx canister create Futura_backend && dfx generate Futura_backend && dfx deploy",
+    "setup": "npm i && dfx canister create futura_backend && dfx generate futura_backend && dfx deploy",
     "dev": "vite --port 3000",
     "start": "vite --port 3000",
     "prebuild": "dfx generate",
