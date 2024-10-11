@@ -59,34 +59,34 @@ const ImageUpload = () => {
             content: "Sample text",
             metadata: [
               {
-                // Wrap in array for Opt type
                 description: ["Text description"],
                 date: ["2024-10-10"],
                 place: ["Test Location"],
                 tags: [["test", "text"]],
-                visibility: [],
-                people: [],
+                visibility: [], // Empty array for optional field
+                people: [], // Empty array for optional field
               },
             ],
           },
         ],
         images: [
           {
-            content: Array.from(imageUint8Array), // Convert Uint8Array to regular array
+            content: Array.from(imageUint8Array),
             metadata: [
               {
-                // Wrap in array for Opt type
                 description: ["Sample Image"],
                 date: ["2024-10-10"],
                 place: ["Berlin"],
                 tags: [["test", "image"]],
-                visibility: [],
-                people: [],
+                visibility: [], // Empty array for optional field
+                people: [], // Empty array for optional field
               },
             ],
           },
         ],
       };
+
+      console.log(JSON.stringify(data, null, 2)); // Log the data structure
 
       // Encode the data using IDL
       const encodedArguments = IDL.encode([MemoryType], [data]);
