@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { futura_backend } from "declarations/futura_backend";
 import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
+import { Button } from "@/components/ui/button";
+// import { Button } from "@/
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -103,7 +105,7 @@ function App() {
       <h1 class="text-3xl font-bold underline bg-sky-500 hover:bg-sky-700">
         Hello world!
       </h1>
-      <button class="bg-sky-500 hover:bg-sky-700 ...">Save changes</button>
+      <Button variant="outline">Button</Button>
     </main>
   );
 }
