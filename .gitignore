@@ -31,3 +31,6 @@ tests/venv/
 /tests/store_output.log
 /tests/test_image_candid.log
 /tests/output_image.png
+
+Cargo.lock
+package-lock.json
