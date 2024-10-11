@@ -1,12 +1,17 @@
 #!/bin/bash
 
+IMAGE_PATH="Futura.png"
+OUTPUT_IMAGE_PATH="output_image.png"
+# CANDID_LOG_FILE="test_image_candid.log"
+ERROR_LOG_FILE="test_image_error.log"
+
 env_file="../.env"
 
-get_canister_id_futura_backend() {
-	# CANISTER_ID_FUTURA_BACKEND=$(dfx canister id futura_backend)
-	# grep "CANISTER_ID_FUTURA_BACKEND" $env_file | cut -d '=' -f2
-	grep "^CANISTER_ID_FUTURA_BACKEND=" "$env_file" | cut -d '=' -f2 | tr -d '"' | tr -d "'"
+# > "$CANDID_LOG_FILE"
+> "$ERROR_LOG_FILE"
 
+get_canister_id_futura_backend() {
+	grep "^CANISTER_ID_FUTURA_BACKEND=" "$env_file" | cut -d '=' -f2 | tr -d '"' | tr -d "'"
 }
 
 CANISTER_ID_FUTURA_BACKEND=$(get_canister_id_futura_backend)
@@ -16,21 +21,15 @@ if [ -z "$CANISTER_ID_FUTURA_BACKEND" ]; then
 	exit 1
 fi
 
-# Print out the retrieved CANISTER_ID_FUTURA_BACKEND
-echo "Loaded CANISTER_ID_FUTURA_BACKEND: $CANISTER_ID_FUTURA_BACKEND"
+DFX_CANISTER_ID=$(dfx canister id futura_backend 2>/dev/null)
 
-# Test if dfx recognizes the ID (optional)
-echo "Running 'dfx canister info' for $CANISTER_ID_FUTURA_BACKEND"
-dfx canister info "$CANISTER_ID_FUTURA_BACKEND"
+if [ "$CANISTER_ID_FUTURA_BACKEND" != "$DFX_CANISTER_ID" ]; then
+    echo "Mismatch between .env CANISTER_ID_FUTURA_BACKEND and 'dfx canister id futura_backend'"
+    exit 1
+else
+    echo "CANISTER_ID_FUTURA_BACKEND matches the 'dfx canister id futura_backend' output."
+fi
 
-
-IMAGE_PATH="Futura.png"
-OUTPUT_IMAGE_PATH="output_image.png"
-CANDID_LOG_FILE="test_image_candid.log"
-ERROR_LOG_FILE="test_image_error.log"
-
-
-# Function to encode image as hex string
 encode_image() {
     xxd -p "$1" | tr -d '\n'
 }
@@ -68,10 +67,6 @@ construct_candid_argument() {
     })"
 }
 
-# Clear log files
-> "$CANDID_LOG_FILE"
-> "$ERROR_LOG_FILE"
-
 # Prompt user for test type
 echo "Select test type:"
 echo "1) Test with real image"
@@ -93,16 +88,13 @@ case $choice in
         ;;
 esac
 
-# Construct Candid argument
 CANDID_ARGUMENT=$(construct_candid_argument "$IMAGE_BINARY")
 
-# Log the Candid argument
-echo "Constructed Candid Argument:" > "$CANDID_LOG_FILE"
-echo "$CANDID_ARGUMENT" >> "$CANDID_LOG_FILE"
+# echo "Constructed Candid Argument:" > "$CANDID_LOG_FILE"
+# echo "$CANDID_ARGUMENT" >> "$CANDID_LOG_FILE"
 
-# Store the image
 echo "Storing image to the canister..."
-dfx canister call "$CANISTER_ID" store_memory "$CANDID_ARGUMENT" > store_output.log 2>> "$ERROR_LOG_FILE"
+dfx canister call "$CANISTER_ID_FUTURA_BACKEND" store_memory "$CANDID_ARGUMENT" > store_output.log 2>> "$ERROR_LOG_FILE"
 
 if [ $? -ne 0 ]; then
     echo "Failed to store the image. See $ERROR_LOG_FILE for details."
