@@ -1,15 +1,15 @@
 {
   "canisters": {
     "futura_backend": {
-      "candid": "src/Futura_backend/futura_backend.did",
+      "candid": "src/futura_backend/futura_backend.did",
       "package": "futura_backend",
       "type": "rust"
     },
-    "Futura_frontend": {
+    "futura_frontend": {
       "dependencies": ["futura_backend"],
-      "source": ["src/Futura_frontend/dist"],
+      "source": ["src/futura_frontend/dist"],
       "type": "assets",
-      "workspace": "Futura_frontend"
+      "workspace": "futura_frontend"
     }
   },
   "defaults": {

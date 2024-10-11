@@ -22,6 +22,7 @@ dist/
 
 # environment variables
 .env
+
 # Python virtual environment in the tests directory
 tests/venv/
 
@@ -38,3 +39,22 @@ canister_ids.json
 /src/futura_frontend/tsconfig.app.tsbuildinfo
 /src/futura_frontend/tsconfig.node.tsbuildinfo
 /tests/test_retrieve_image_error.log
+
+
+# Rust and Node.js lock files
+Cargo.lock
+package-lock.json
+
+# TypeScript build info files
+*.tsbuildinfo
+
+# TypeScript declaration files (generated)
+vite.config.d.ts
+
+# Vite build outputs
+.vite/
+out/
+
+# Log files
+*.log
+
