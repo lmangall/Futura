@@ -54,44 +54,45 @@ const ImageUpload = () => {
       // Construct the memory object
       const memory = {
         texts: [
-          {
-            content: "Sample text",
-            metadata: [
-              {
-                description: ["Text description"],
-                date: ["2024-10-10"],
-                place: ["Test Location"],
-                tags: [["test", "text"]],
-                visibility: [],
-                people: [],
-              },
-            ],
-          },
+          [
+            {
+              content: "Sample text",
+              metadata: [
+                {
+                  description: ["Text description"],
+                  date: ["2024-10-10"],
+                  place: ["Test Location"],
+                  tags: [["test", "text"]],
+                  visibility: [],
+                  people: [],
+                },
+              ],
+            },
+          ],
         ],
         images: [
-          {
-            content: imageUint8Array,
-            metadata: [
-              {
-                description: ["Sample Image"],
-                date: ["2024-10-10"],
-                place: ["Berlin"],
-                tags: [["test", "image"]],
-                visibility: [],
-                people: [],
-              },
-            ],
-          },
+          [
+            {
+              content: Array.from(imageUint8Array),
+              metadata: [
+                {
+                  description: ["Sample Image"],
+                  date: ["2024-10-10"],
+                  place: ["Berlin"],
+                  tags: [["test", "image"]],
+                  visibility: [],
+                  people: [],
+                },
+              ],
+            },
+          ],
         ],
       };
 
       console.log(JSON.stringify(memory, null, 2)); // Log the data structure
 
-      // Encode the memory object using IDL
-      const encodedMemory = IDL.encode([MemoryType], [memory]);
-
       // Call the 'store_memory' function on the backend canister
-      await futura_backend.store_memory(encodedMemory);
+      await futura_backend.store_memory(memory);
 
       setResponse("Image uploaded successfully!");
     } catch (error) {
