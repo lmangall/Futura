@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Principal } from "@dfinity/principal";
-import { IDL } from "@dfinity/candid";
 import { futura_backend } from "declarations/futura_backend";
+import { IDL } from "@dfinity/candid";
 
 const Metadata = IDL.Record({
   description: IDL.Opt(IDL.Text),
@@ -36,7 +35,7 @@ const ImageUpload = () => {
     const file = e.target.files[0];
     if (file) {
       setSelectedImage(file);
-      setImagePreview(URL.createObjectURL(file)); // Preview image
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -52,8 +51,8 @@ const ImageUpload = () => {
       const imageArrayBuffer = await selectedImage.arrayBuffer();
       const imageUint8Array = new Uint8Array(imageArrayBuffer);
 
-      // Construct the data object
-      const data = {
+      // Construct the memory object
+      const memory = {
         texts: [
           {
             content: "Sample text",
@@ -63,36 +62,36 @@ const ImageUpload = () => {
                 date: ["2024-10-10"],
                 place: ["Test Location"],
                 tags: [["test", "text"]],
-                visibility: [], // Empty array for optional field
-                people: [], // Empty array for optional field
+                visibility: [],
+                people: [],
               },
             ],
           },
         ],
         images: [
           {
-            content: Array.from(imageUint8Array),
+            content: imageUint8Array,
             metadata: [
               {
                 description: ["Sample Image"],
                 date: ["2024-10-10"],
                 place: ["Berlin"],
                 tags: [["test", "image"]],
-                visibility: [], // Empty array for optional field
-                people: [], // Empty array for optional field
+                visibility: [],
+                people: [],
               },
             ],
           },
         ],
       };
 
-      console.log(JSON.stringify(data, null, 2)); // Log the data structure
+      console.log(JSON.stringify(memory, null, 2)); // Log the data structure
 
-      // Encode the data using IDL
-      const encodedArguments = IDL.encode([MemoryType], [data]);
+      // Encode the memory object using IDL
+      const encodedMemory = IDL.encode([MemoryType], [memory]);
 
       // Call the 'store_memory' function on the backend canister
-      await futura_backend.store_memory(encodedArguments);
+      await futura_backend.store_memory(encodedMemory);
 
       setResponse("Image uploaded successfully!");
     } catch (error) {
@@ -100,6 +99,7 @@ const ImageUpload = () => {
       setResponse("Failed to upload image.");
     }
   };
+
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mt-8">
       <h2 className="text-2xl font-bold text-center mb-6">Image Upload</h2>
