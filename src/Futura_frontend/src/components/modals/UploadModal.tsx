@@ -3,7 +3,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { File } from "lucide-react";
 import { IDL } from "@dfinity/candid";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +30,6 @@ const UploadModal = ({ isOpen, onClose }) => {
   const [people, setPeople] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [response, setResponse] = useState("");
-  const [useHardcodedValues, setUseHardcodedValues] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -42,9 +40,7 @@ const UploadModal = ({ isOpen, onClose }) => {
   const handleUpload = async () => {
     let imageData: number[] = [];
 
-    if (useHardcodedValues) {
-      imageData = [0, 1, 2, 3, 4, 5]; // Example hardcoded byte array
-    } else if (file) {
+    if (file) {
       const reader = new FileReader();
       const fileContent = await new Promise<ArrayBuffer>((resolve) => {
         reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
@@ -68,9 +64,7 @@ const UploadModal = ({ isOpen, onClose }) => {
           ? [
               [
                 {
-                  content: useHardcodedValues
-                    ? "Sample text content"
-                    : description,
+                  content: description,
                   metadata: [metadata],
                 },
               ],
@@ -181,20 +175,6 @@ const UploadModal = ({ isOpen, onClose }) => {
               value={people}
               onChange={(e) => setPeople(e.target.value)}
             />
-          </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="use-hardcoded-values"
-              checked={useHardcodedValues}
-              onChange={() => setUseHardcodedValues((prev) => !prev)}
-            />
-            <Label
-              htmlFor="use-hardcoded-values"
-              className="text-sm font-medium text-red"
-            >
-              Use Hardcoded Values
-            </Label>
           </div>
           <div className="space-y-2 text-sm">
             <Label htmlFor="file" className="text-sm font-medium">
