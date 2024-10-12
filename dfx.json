@@ -1,7 +1,7 @@
 {
   "canisters": {
     "futura_backend": {
-      "candid": "src/futura_backend/futura_backend.did",
+      "candid": "src/Futura_backend/futura_backend.did",
       "package": "futura_backend",
       "type": "rust"
     },
