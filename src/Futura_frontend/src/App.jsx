@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { futura_backend } from "declarations/futura_backend";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
 import ImageUploadForm from "./components/ImageUploadForm";
 import Greeting from "./components/Greeting";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckboxDemo } from "./components/CheckboxDemo";
+import Dashboard from "./components/Dashboard";
+// import { Button } from "@/components/ui/button";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -26,7 +29,9 @@ function App() {
       await window.ic.plug.createAgent({ whitelist, host });
     }
 
-    const principal = window.ic.plug.agent ? await window.ic.plug.agent.getPrincipal() : null;
+    const principal = window.ic.plug.agent
+      ? await window.ic.plug.agent.getPrincipal()
+      : null;
     if (principal) {
       console.log("User principal fetched successfully:", principal.toString());
       setPrincipal(principal.toString());
@@ -62,50 +67,77 @@ function App() {
   };
 
   return (
-    <main className="flex flex-col items-center p-6 bg-pink-100">
-      <img src="/logo2.svg" alt="DFINITY logo" className="max-w-[50vw] max-h-[25vw] block m-auto" />
+    <Router>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Route for the Home  */}
+        <Route
+          path="/"
+          element={
+            <main className="flex flex-col items-center p-6 bg-pink-100">
+              <img
+                src="/logo2.svg"
+                alt="DFINITY logo"
+                className="max-w-[50vw] max-h-[25vw] block m-auto"
+              />
 
-      <br />
-      {!isConnected ? (
-        <PlugConnect
-          whitelist={[process.env.CANISTER_ID_FUTURA_BACKEND]}
-          onConnectCallback={() => {
-            console.log("PlugConnect onConnectCallback triggered.");
+              <br />
+              {!isConnected ? (
+                <PlugConnect
+                  whitelist={[process.env.CANISTER_ID_FUTURA_BACKEND]}
+                  onConnectCallback={() => {
+                    console.log("PlugConnect onConnectCallback triggered.");
 
-            const principal = window.ic.plug.agent.getPrincipal();
+                    const principal = window.ic.plug.agent.getPrincipal();
 
-            if (principal) {
-              console.log("User principal fetched successfully:", principal.toString());
-              setPrincipal(principal.toString());
-              setIsConnected(true);
-            } else {
-              console.log("Failed to fetch user principal.");
-            }
-          }}
+                    if (principal) {
+                      console.log(
+                        "User principal fetched successfully:",
+                        principal.toString()
+                      );
+                      setPrincipal(principal.toString());
+                      setIsConnected(true);
+                    } else {
+                      console.log("Failed to fetch user principal.");
+                    }
+                  }}
+                />
+              ) : (
+                <>
+                  <button className="flex items-center p-3 bg-green-600 text-white rounded-full mt-5 transition-colors duration-300 hover:bg-green-700 cursor-pointer">
+                    <img
+                      src="/Pluglogo.svg"
+                      alt="Plug logo"
+                      className="w-8 h-8 rounded-full mr-3"
+                    />
+                    <span className="font-bold">
+                      {shortenPrincipal(principal.toString())}
+                    </span>
+                    <button
+                      onClick={handleDisconnect}
+                      className="ml-3 bg-transparent border-none text-white cursor-pointer text-sm p-2 transition-colors hover:text-red-400"
+                    >
+                      Logout
+                    </button>
+                  </button>
+                  <MemoryForm />
+                </>
+              )}
+              <Greeting />
+              <ImageUploadForm />
+              <br />
+              <Checkbox />
+              <br />
+
+              <CheckboxDemo />
+              <div>
+                <Link to="/dashboard">Dashboard</Link>
+              </div>
+            </main>
+          }
         />
-      ) : (
-        <>
-          <button className="flex items-center p-3 bg-green-600 text-white rounded-full mt-5 transition-colors duration-300 hover:bg-green-700 cursor-pointer">
-            <img src="/Pluglogo.svg" alt="Plug logo" className="w-8 h-8 rounded-full mr-3" />
-            <span className="font-bold">{shortenPrincipal(principal.toString())}</span>
-            <button
-              onClick={handleDisconnect}
-              className="ml-3 bg-transparent border-none text-white cursor-pointer text-sm p-2 transition-colors hover:text-red-400"
-            >
-              Logout
-            </button>
-          </button>
-          <MemoryForm />
-        </>
-      )}
-      <Greeting />
-      <ImageUploadForm />
-      <br />
-      <Checkbox />
-      <br />
-
-      <CheckboxDemo />
-    </main>
+      </Routes>
+    </Router>
   );
 }
 
