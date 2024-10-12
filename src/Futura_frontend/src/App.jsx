@@ -5,6 +5,7 @@ import Dashboard from "./components/Dashboard";
 import Authentication from "./components/Authentication";
 import { Hero } from "@/components/Hero";
 import { Pricing } from "@/components/Pricing";
+import { Testimonials } from "@/components/Testimonials";
 // import MemoryForm from "./components/MemoryForm";
 // import ImageUploadForm from "./components/ImageUploadForm";
 // import { Button } from "./components/ui/button";
@@ -37,6 +38,7 @@ function App() {
             <main className="flex flex-col items-center p-6">
               <Hero />
               <Pricing />
+              <Testimonials />
               {/* <img
                 src="/logo2.svg"
                 alt="DFINITY logo"
