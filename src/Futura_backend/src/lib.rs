@@ -1,54 +1,69 @@
-use candid::{CandidType, Principal}; // Add CandidType
-use ic_cdk::storage; // Storage for the canister
-use ic_cdk_macros::{post_upgrade, pre_upgrade}; // Macros for upgrade functions
-use lazy_static::lazy_static; // For creating a static, global storage
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::Mutex; // Mutex for thread safety in global storage // For serializing and deserializing data
+mod types;
+mod utils;
 
-lazy_static! {
-    static ref MEMORY_STORAGE: Mutex<HashMap<Principal, Vec<Memory>>> = Mutex::new(HashMap::new());
+use candid::Principal;
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
+use std::cell::RefCell;
+use crate::types::{Statistics, UserData, AddImages};
+// use crate::utils::validate_caller_not_anonymous;
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
+thread_local! {
+    // The memory manager is used for simulating multiple memories. Given a `MemoryId` it can
+    // return a memory that can be used by stable structures.
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+    
+    static ASSETS: RefCell<StableBTreeMap<Principal, UserData, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+        )
+    );
 }
+
+// TODO: #[ic_cdk_macros::query] vs #[ic_cdk::query] - the same?
 
 #[ic_cdk::query]
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
 
-// Define a struct for memory
-
-#[derive(Clone, Serialize, Deserialize, CandidType)]
-struct Memory {
-    texts: Option<Vec<Text>>,   // Change to Option to allow for optionality
-    images: Option<Vec<Image>>, // Change to Option to allow for optionality
+#[ic_cdk_macros::query]
+fn retrieve_memory() -> Option<UserData> {
+    // let key = validate_caller_not_anonymous(); TODO: Result instead of Option
+    let key = ic_cdk::caller();
+    ASSETS.with(|p| p.borrow().get(&key))
 }
 
-#[derive(Clone, Serialize, Deserialize, CandidType)]
-struct Text {
-    content: String,
-    metadata: Option<Metadata>,
+#[ic_cdk_macros::update]
+fn store_image(memory: AddImages) -> Option<String> {
+    // let key = validate_caller_not_anonymous(); TODO: Result instead of Option
+    let key = ic_cdk::caller();
+    ASSETS.with(|assets| {
+        let mut map = assets.borrow_mut();
+
+        // check if the user already has memory
+        if let Some(mut data) = map.get(&key) {
+            data.images.extend(memory.images);
+        } else {
+            map.insert(key, UserData {
+                texts: vec![],
+                images: memory.images,
+            });
+        }
+    });
+    Some("Inserted".to_string())
 }
 
-#[derive(Clone, Serialize, Deserialize, CandidType)]
-struct Image {
-    content: Vec<u8>,
-    metadata: Option<Metadata>,
-}
-
-#[derive(Clone, Serialize, Deserialize, CandidType)]
-struct Metadata {
-    description: Option<String>, // Updated to Option
-    date: Option<String>,        // Added date field
-    place: Option<String>,
-    tags: Option<Vec<String>>,
-    people: Option<Vec<String>>,
-    visibility: Option<Vec<Principal>>,
-}
-
-#[derive(CandidType)]
-struct Statistics {
-    total_memories: u64,
-    total_users: u64,
+#[ic_cdk_macros::query]
+fn get_statistics() -> Statistics {
+    let total_users = ASSETS.with(|p| p.borrow().len() as u64);
+    let total_memory = ASSETS.with(|p| p.borrow().iter().map(|(_, m)| m).count() as u64);
+    Statistics {
+        total_users,
+        total_memory,
+    }
 }
 
 /* TODO: Consider size limitations for large image data. Since images can be large,
@@ -56,71 +71,8 @@ struct Statistics {
      fits within the limits of stable memory.
 */
 
-// // Serialize and store the state before upgrading
-// #[pre_upgrade]
-// fn pre_upgrade() {
-//     let storage = MEMORY_STORAGE.lock().unwrap();
-//     let serialized_data =
-//         serde_json::to_vec(&*storage).expect("Failed to serialize memory storage");
-//     storage::stable_save((serialized_data,)).expect("Failed to save to stable memory");
-// }
-
-// // Deserialize and restore the state after upgrading
-// #[post_upgrade]
-// fn post_upgrade() {
-//     let (serialized_data,): (Vec<u8>,) =
-//         ic_cdk::storage::stable_restore().expect("Failed to restore from stable memory");
-//     let deserialized_storage: HashMap<Principal, Vec<Memory>> =
-//         serde_json::from_slice(&serialized_data).expect("Failed to deserialize memory storage");
-//     let mut storage = MEMORY_STORAGE.lock().unwrap();
-//     *storage = deserialized_storage;
-// }
-
 /*
 TODO: Consider handling large images more efficiently.
 For example, add image compression or splitting large images into chunks.
 This will help prevent issues with memory usage or storage limitations, especially as images could be large.
 */
-
-// Function to store a memory
-// #[ic_cdk::update]
-// fn store_memory(texts: Vec<Text>, images: Vec<Image>) {
-//     let caller = ic_cdk::caller();
-//     let memory = Memory {
-//         texts: Some(texts),   // Wrap texts in Some
-//         images: Some(images), // Wrap images in Some
-//     };
-
-//     let mut storage = MEMORY_STORAGE.lock().unwrap();
-//     storage.insert(caller, memory);
-// }
-
-// Claude version
-#[ic_cdk::update]
-fn store_memory(memory: Memory) {
-    let caller = ic_cdk::caller();
-    let mut storage = MEMORY_STORAGE.lock().unwrap();
-    
-    // if caller does not exist in the storage, create a new entry
-    storage.entry(caller).or_insert(Vec::new()).push(memory);
-}
-
-// Function to retrieve a memory for the caller
-#[ic_cdk::query]
-fn retrieve_memory() -> Option<Vec<Memory>> {
-    let caller = ic_cdk::caller();
-    let storage = MEMORY_STORAGE.lock().unwrap();
-    storage.get(&caller).cloned()
-}
-
-#[ic_cdk::query]
-fn get_statistics() -> Statistics {
-    let storage = MEMORY_STORAGE.lock().unwrap();
-    let total_memories = storage.len();
-    let total_users = storage.keys().len();
-
-    Statistics {
-        total_memories: total_memories as u64,
-        total_users: total_users as u64,
-    }
-}

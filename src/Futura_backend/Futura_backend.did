@@ -3,6 +3,10 @@ type Memory = record {
     images: opt vec Image;
 };
 
+type AddImages = record {
+    images: vec Image;
+};
+
 type Text = record {
     content: text;
     metadata: opt Metadata;
@@ -23,13 +27,13 @@ type Metadata = record {
 };
 
 type Statistics = record {
-    total_memories: nat64;
     total_users: nat64;
+    total_memory: nat64;
 }
 
 service : {
     "greet": (text) -> (text) query;
-    "store_memory": (Memory) -> ();
-    "retrieve_memory": () -> (opt vec Memory) query;
+    "store_image": (AddImages) -> ();
+    "retrieve_memory": () -> (opt Memory) query;
     "get_statistics": () -> (Statistics) query;
 };

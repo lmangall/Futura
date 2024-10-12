@@ -38,20 +38,7 @@ encode_image() {
 construct_candid_argument() {
     local image_content="$1"
     echo "(record { 
-        texts = opt vec { 
-            record { 
-                content = \"Sample text\"; 
-                metadata = opt record { 
-                    description = opt \"Text description\";
-                    date = opt \"2024-10-10\";
-                    place = opt \"Test Location\";
-                    tags = opt vec { \"test\"; \"text\" };
-                    visibility = opt vec {};
-                    people = opt vec {};
-                }
-            } 
-        }; 
-        images = opt vec { 
+        images = vec { 
             record { 
                 content = blob \"$image_content\"; 
                 metadata = opt record { 
@@ -94,7 +81,7 @@ CANDID_ARGUMENT=$(construct_candid_argument "$IMAGE_BINARY")
 # echo "$CANDID_ARGUMENT" >> "$CANDID_LOG_FILE"
 
 echo "Storing image to the canister..."
-dfx canister call "$CANISTER_ID_FUTURA_BACKEND" store_memory "$CANDID_ARGUMENT" > store_output.log 2>> "$ERROR_LOG_FILE"
+dfx canister call "$CANISTER_ID_FUTURA_BACKEND" store_image "$CANDID_ARGUMENT" > store_output.log 2>> "$ERROR_LOG_FILE"
 
 if [ $? -ne 0 ]; then
     echo "Failed to store the image. See $ERROR_LOG_FILE for details."
