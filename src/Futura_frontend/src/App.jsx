@@ -7,6 +7,7 @@ import { Hero } from "@/components/Hero";
 import { Pricing } from "@/components/Pricing";
 import { Testimonials } from "@/components/Testimonials";
 import { Team } from "./components/Team";
+import { Features } from "./components/Features";
 // import MemoryForm from "./components/MemoryForm";
 // import ImageUploadForm from "./components/ImageUploadForm";
 // import { Button } from "./components/ui/button";
@@ -38,6 +39,7 @@ function App() {
           element={
             <main className="flex flex-col items-center p-6">
               <Hero />
+              <Features />
               <Pricing />
               <Testimonials />
               <Team />
