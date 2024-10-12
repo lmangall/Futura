@@ -6,6 +6,7 @@ import Authentication from "./components/Authentication";
 import { Hero } from "@/components/Hero";
 import { Pricing } from "@/components/Pricing";
 import { Testimonials } from "@/components/Testimonials";
+import { Team } from "./components/Team";
 // import MemoryForm from "./components/MemoryForm";
 // import ImageUploadForm from "./components/ImageUploadForm";
 // import { Button } from "./components/ui/button";
@@ -39,6 +40,7 @@ function App() {
               <Hero />
               <Pricing />
               <Testimonials />
+              <Team />
               {/* <img
                 src="/logo2.svg"
                 alt="DFINITY logo"

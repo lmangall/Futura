@@ -49,11 +49,14 @@ export const Testimonials = () => {
     <section className="py-32">
       <div className="container">
         <Carousel className="w-full">
-          <div className="mb-8 flex justify-between px-1 lg:mb-12">
-            <h2 className="text-2xl font-semibold lg:text-5xl">
-              Why Clients Love Us
+          <div className="flex text-center justify-center items-center gap-4 flex-col">
+            <h2 className="text-3xl md:text-5xl tracking-tighter max-w-xl text-center font-regular">
+              Why people like you use Futura
             </h2>
-            <div className="flex items-center space-x-2">
+            {/* <p className="text-lg leading-relaxed tracking-tight text-muted-foreground max-w-xl text-center">
+              "lifelong" is not what we do, Futura's service goes beyond life.
+            </p> */}
+            <div className="flex items-center space-x-2 mb-2">
               <CarouselPrevious className="static translate-y-0" />
               <CarouselNext className="static translate-y-0" />
             </div>
