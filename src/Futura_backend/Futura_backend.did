@@ -1,31 +1,47 @@
-// BTreeMap<Principal, Capsule>
-
 type Capsule = record {
-    texts: opt vec Text;
-    images: opt vec Image;
+    texts: vec Text;
+    images: vec Image;
+    settings: Settings;
+    metadata: CapsuleMetadata;
+};
+
+type Settings = record {
+    language: opt text; // TODO: enum
+    visibility: vec principal;
+    // TODO: add more
 };
 
 type Text = record {
     id: nat64;
     content: text;
-    metadata: opt Metadata;
+    metadata: Metadata;
 };
 
 type Image = record {
     id: nat64;
     content: blob;
-    metadata: opt Metadata;
+    metadata: Metadata;
+};
+
+type CapsuleMetadata = record {
+    description: opt text;
+    creation_date: opt text;
+    name: text;
+    id_generator: nat64;
+    // TODO: add more
 };
 
 type Metadata = record {
     file_name: text;
     file_type: text;
+    file_size: nat64;
     description: opt text;
     date: opt text;
     place: opt text;
     tags: opt vec text;
     visibility: opt vec principal;
 	people: opt vec text;
+    preview: opt blob; // compressed image
 };
 
 type CapsuleStats = record {
@@ -44,5 +60,20 @@ service : {
     "store_texts": (vec Text) -> (variant { Ok : text; Err : text });
     "store_images": (vec Image) -> (variant { Ok : text; Err : text });
     "retrieve_images": (ids: opt vec nat64) -> (variant { Ok : vec Image; Err : text });
+    "retrieve_texts": (ids: opt vec nat64) -> (variant { Ok : vec Text; Err : text });
     "retrieve_capsule_stats": () -> (CapsuleStats);
 };
+
+// TODO: 
+// 1. image type
+// 2. image compression
+// 3. retrieve_summary
+// 4. retrieve_global_stats
+
+//"retrieve_summary": (preview: bool) -> (variant { Ok : vec Metadata; Err : text});
+//"retrieve_global_stats": () -> (variant { Ok : Stats; Err : text });
+//"update_texts": (vec Text) -> (variant { Ok : text; Err : text });
+//"update_images": (vec Image) -> (variant { Ok : text; Err : text });
+//"update_settings": (Settings) -> (variant { Ok : text; Err : text });
+//"delete_texts": (id: nat64) -> (variant { Ok : text; Err : text });
+//"delete_images": (id: nat64) -> (variant { Ok : text; Err : text });

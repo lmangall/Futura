@@ -37,19 +37,23 @@ encode_image() {
 # Function to construct Candid argument
 construct_candid_argument() {
     local image_content="$1"
+    // image content divided by 4
+    local image_content_1=$(echo $image_content | cut -c1-1000)
     echo "(vec { 
             record {
-                id = 1;
+                id = 2;
                 content = blob \"$image_content\"; 
-                metadata = opt record {
+                metadata = record {
                     file_name = \"2024-10-10\";
                     file_type = \"2024-10-10\";
+                    file_size = 2024;
                     description = opt \"Sample Image\"; 
                     date = opt \"2024-10-10\"; 
                     place = opt \"Berlin\"; 
                     tags = opt vec { \"test\"; \"image\" }; 
                     visibility = opt vec {}; 
-                    people = opt vec {}; 
+                    people = opt vec {};
+                    preview = opt blob \"$image_content_1\";
                 } 
             } 
         })"
@@ -105,8 +109,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Only preview image is retrieved
 # Extract the blob image from the memory output (macOS compatible)
-IMAGE_BINARY=$(echo "$MEMORY_OUTPUT" | sed -n 's/.*content = blob "\([^"]*\)".*/\1/p')
+IMAGE_BINARY=$(echo "$MEMORY_OUTPUT" | sed -n 's/.*preview = opt blob "\([^"]*\)".*/\1/p')
 
 if [ -z "$IMAGE_BINARY" ]; then
     echo "No image found in the retrieved memory."

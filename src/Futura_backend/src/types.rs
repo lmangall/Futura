@@ -8,30 +8,52 @@ use std::{borrow::Cow, cell::RefCell};
 pub struct Capsule{
     pub texts: Vec<Text>,  
     pub images: Vec<Image>,
+    pub settings: Settings,
+    pub metadata: CapsuleMetadata,
 }
 
 #[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]
 pub struct Text {
     pub id: u64,
     pub content: String,
-    pub metadata: Option<Metadata>,
+    pub metadata: Metadata,
+}
+
+#[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug, Default)]
+pub struct Settings {
+    pub language:  Option<String>, // TODO: enum
+    pub visibility: Vec<Principal>
+    // TODO: add more
+}
+
+#[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug, Default)]
+pub struct CapsuleMetadata {
+    pub description: Option<String> ,
+    pub creation_date: Option<String>,
+    pub name: String,
+    pub id_generator: u64,
+    // TODO: add more
 }
 
 #[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]
 pub struct Image {
     pub id: u64,
     pub content: Vec<u8>,
-    pub metadata: Option<Metadata>,
+    pub metadata: Metadata,
 }
 
 #[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]
 pub struct Metadata {
+    pub file_name: String,
+    pub file_type: String,
+    pub file_size: u64,
     pub description: Option<String>, // Updated to Option
     pub date: Option<String>,        // Added date field
     pub place: Option<String>,
     pub tags: Option<Vec<String>>,
     pub people: Option<Vec<String>>,
     pub visibility: Option<Vec<Principal>>,
+    pub preview: Option<Vec<u8>>, // compressed image
 }
 
 #[derive(CandidType)]

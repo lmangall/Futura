@@ -57,6 +57,36 @@ fn retrieve_images(ids: Option<Vec<u64>>) -> Result<Vec<Image>, String> {
     })
 }
 
+#[ic_cdk::query]
+fn retrieve_texts(ids: Option<Vec<u64>>) -> Result<Vec<Text>, String> {
+    let key = validate_caller_not_anonymous()
+        .map_err(|e| format!("Error: {}", e)).unwrap();
+
+    CAPSULES.with(|capsules| {
+        if let Some(capsule) = capsules.borrow().get(&key) {
+            if capsule.texts.is_empty() {
+                return Err("No texts found".to_string());
+            }
+            
+            // if id is provided, return only the texts with the specified ids
+            if let Some(unwrapped_ids) = ids {
+                let mut texts = vec![];
+                for text in capsule.texts.iter() {
+                    if unwrapped_ids.contains(&text.id) {
+                        texts.push(text.clone());
+                    }
+                }
+                return Ok(texts);
+            }
+
+            // return all texts if id is not provided
+            return Ok(capsule.texts.clone());
+        } else {
+            return Err("No data found".to_string());
+        }
+    })
+}
+
 #[ic_cdk::update]
 fn store_images(images: Vec<Image>) -> Result<String, String> {
     let user_principal = validate_caller_not_anonymous()
@@ -68,14 +98,19 @@ fn store_images(images: Vec<Image>) -> Result<String, String> {
         // check if the user already has memory
         if let Some(mut capsule) = borrowed_capsules.get(&user_principal) {
             capsule.images.extend(images);
+            // TODO: is it efficient?
             borrowed_capsules.insert(user_principal, Capsule {
                 texts: capsule.texts,
                 images: capsule.images,
+                metadata: capsule.metadata,
+                settings: capsule.settings,
             });
         } else {
             borrowed_capsules.insert(user_principal, Capsule {
                 texts: vec![],
                 images: images,
+                metadata: Default::default(),
+                settings: Default::default(),
             });
         }
     });
@@ -96,27 +131,20 @@ fn store_texts(texts: Vec<Text>) -> Result<String, String> {
             borrowed_capsules.insert(user_principal, Capsule {
                 texts: capsule.texts,
                 images: capsule.images,
+                metadata: capsule.metadata,
+                settings: capsule.settings,
             });
         } else {
             borrowed_capsules.insert(user_principal, Capsule {
                 texts,
                 images: vec![],
+                metadata: Default::default(),
+                settings: Default::default(),
             });
         }
     });
     Ok("Texts stored successfully".to_string())
 }
-
-
-// #[ic_cdk::query]
-// fn get_statistics() -> Statistics {
-//     let total_users = CAPSULES.with(|p| p.borrow().len() as u64);
-//     let total_memory = CAPSULES.with(|p| p.borrow().iter().map(|(_, m)| m).count() as u64);
-//     Statistics {
-//         total_users,
-//         total_memory,
-//     }
-// }
 
 #[ic_cdk::query]
 fn retrieve_capsule_stats() -> CapsuleStats {
