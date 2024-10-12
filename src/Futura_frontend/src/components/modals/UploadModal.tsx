@@ -8,6 +8,7 @@ import { IDL } from "@dfinity/candid";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { futura_backend } from "../../../../declarations/futura_backend";
 
 const Metadata = IDL.Record({
   description: IDL.Opt(IDL.Text),
@@ -48,6 +49,90 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
   const [tags, setTags] = useState("");
   const [visibility, setVisibility] = useState("");
   const [people, setPeople] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [response, setResponse] = useState("");
+  //WARNING: hardcoded values for testing
+  const [useHardcodedValues, setUseHardcodedValues] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      setResponse("Please select a file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const imageUint8Array = new Uint8Array(
+        event.target?.result as ArrayBuffer
+      );
+
+      const memory = {
+        texts:
+          selectedType === "text"
+            ? [
+                {
+                  content: description,
+                  metadata: [
+                    {
+                      description: useHardcodedValues
+                        ? ["Sample text"]
+                        : [description],
+                      date: useHardcodedValues ? ["2024-10-10"] : [date],
+                      place: useHardcodedValues ? ["Test Location"] : [place],
+                      tags: useHardcodedValues
+                        ? [["test", "text"]]
+                        : [tags.split(",").map((tag) => tag.trim())],
+                      visibility: [],
+                      people: [],
+                    },
+                  ],
+                },
+              ]
+            : [],
+        images:
+          selectedType === "image"
+            ? [
+                {
+                  content: useHardcodedValues
+                    ? [0, 1, 2] // Example hardcoded byte array for demonstration
+                    : Array.from(imageUint8Array),
+                  metadata: [
+                    {
+                      description: useHardcodedValues
+                        ? ["Sample Image"]
+                        : [description],
+                      date: useHardcodedValues ? ["2024-10-10"] : [date],
+                      place: useHardcodedValues ? ["Berlin"] : [place],
+                      tags: useHardcodedValues
+                        ? [["test", "image"]]
+                        : [tags.split(",").map((tag) => tag.trim())],
+                      visibility: [],
+                      people: [],
+                    },
+                  ],
+                },
+              ]
+            : [],
+      };
+
+      try {
+        console.log(JSON.stringify(memory, null, 2));
+        await futura_backend.store_memory(memory);
+        setResponse("Upload successful!");
+      } catch (error) {
+        console.error("Error uploading:", error);
+        setResponse("Failed to upload.");
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
 
   return (
     <Modal onClose={onClose}>
@@ -131,24 +216,48 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
               onChange={(e) => setPeople(e.target.value)}
             />
           </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="use-hardcoded-values"
+              checked={useHardcodedValues}
+              onChange={() => setUseHardcodedValues((prev) => !prev)}
+              className="mr-2"
+            />
+            <Label
+              htmlFor="use-hardcoded-values"
+              className="text-sm font-medium text-red "
+            >
+              Use Hardcoded Values
+            </Label>
+          </div>
           <div className="border-2 border-dashed border-gray-200 rounded-lg flex flex-col gap-1 p-6 items-center">
             <File className="w-12 h-12" />
             <span className="text-sm font-medium text-gray-500">
               Drag and drop a file or click to browse
             </span>
             <span className="text-xs text-gray-500">
-              PDF, image, video, or audio
+              Only text or image supported
             </span>
           </div>
           <div className="space-y-2 text-sm">
             <Label htmlFor="file" className="text-sm font-medium">
               File
             </Label>
-            <Input id="file" type="file" placeholder="File" accept="image/*" />
+            <Input
+              id="file"
+              type="file"
+              placeholder="File"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
           </div>
+          {response && <div className="text-sm text-gray-500">{response}</div>}
         </CardContent>
         <CardFooter>
-          <Button size="lg">Upload</Button>
+          <Button size="lg" onClick={handleUpload}>
+            Upload
+          </Button>
         </CardFooter>
       </Card>
     </Modal>
