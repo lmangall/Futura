@@ -73,47 +73,38 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       imageData = Array.from(new Uint8Array(fileContent));
     }
 
+    const metadata = {
+      description: description ? [description] : [],
+      date: date ? [date] : [],
+      place: place ? [place] : [],
+      tags: tags ? [tags.split(",").map((tag) => tag.trim())] : [],
+      visibility: [],
+      people: people ? [people.split(",").map((person) => person.trim())] : [],
+    };
+
     const memory = {
       texts:
         selectedType === "text"
           ? [
-              {
-                content: useHardcodedValues
-                  ? "Sample text content"
-                  : description,
-                metadata: [
-                  {
-                    description: description ? [description] : [],
-                    date: date ? [date] : [],
-                    place: place ? [place] : [],
-                    tags: tags
-                      ? [tags.split(",").map((tag) => tag.trim())]
-                      : [],
-                    visibility: [],
-                    people: [],
-                  },
-                ],
-              },
+              [
+                {
+                  content: useHardcodedValues
+                    ? "Sample text content"
+                    : description,
+                  metadata: [metadata],
+                },
+              ],
             ]
           : [],
       images:
         selectedType === "image"
           ? [
-              {
-                content: imageData,
-                metadata: [
-                  {
-                    description: description ? [description] : [],
-                    date: date ? [date] : [],
-                    place: place ? [place] : [],
-                    tags: tags
-                      ? [tags.split(",").map((tag) => tag.trim())]
-                      : [],
-                    visibility: [],
-                    people: [],
-                  },
-                ],
-              },
+              [
+                {
+                  content: imageData,
+                  metadata: [metadata],
+                },
+              ],
             ]
           : [],
     };

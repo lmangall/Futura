@@ -92,6 +92,7 @@ const ImageUpload = () => {
       console.log(JSON.stringify(memory, null, 2)); // Log the data structure
 
       // Call the 'store_memory' function on the backend canister
+      console.log("Calling store_memory with:", memory);
       await futura_backend.store_memory(memory);
 
       setResponse("Image uploaded successfully!");
@@ -113,7 +114,11 @@ const ImageUpload = () => {
         />
         {imagePreview && (
           <div className="mt-4">
-            <img src={imagePreview} alt="Preview" className="w-full h-auto rounded-lg shadow-md" />
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="w-full h-auto rounded-lg shadow-md"
+            />
           </div>
         )}
         <button
