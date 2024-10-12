@@ -3,7 +3,7 @@ import { futura_backend } from "declarations/futura_backend";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
-// import ImageUploadForm from "./components/ImageUploadForm";
+import ImageUploadForm from "./components/ImageUploadForm";
 // import Greeting from "./components/Greeting";
 import Dashboard from "./components/Dashboard";
 import { Button } from "./components/ui/button";
@@ -83,7 +83,6 @@ function App() {
                 alt="DFINITY logo"
                 className="max-w-[50vw] max-h-[25vw] block m-auto"
               />
-
               <br />
               {!isConnected ? (
                 <PlugConnect
@@ -135,6 +134,7 @@ function App() {
               {/* <ImageUploadForm /> */}
               <Button onClick={handleOpenModal}>Upload</Button>
               <UploadModal isOpen={isModalOpen} onClose={handleCloseModal} />
+              <ImageUploadForm />
             </main>
           }
         />

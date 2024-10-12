@@ -51,7 +51,6 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
   const [people, setPeople] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [response, setResponse] = useState("");
-  //WARNING: hardcoded values for testing
   const [useHardcodedValues, setUseHardcodedValues] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,77 +60,73 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
   };
 
   const handleUpload = async () => {
-    if (!file) {
-      setResponse("Please select a file.");
-      return;
+    let imageData: number[] = [];
+
+    if (useHardcodedValues) {
+      imageData = [0, 1, 2, 3, 4, 5]; // Example hardcoded byte array
+    } else if (file) {
+      const reader = new FileReader();
+      const fileContent = await new Promise<ArrayBuffer>((resolve) => {
+        reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
+        reader.readAsArrayBuffer(file);
+      });
+      imageData = Array.from(new Uint8Array(fileContent));
     }
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const imageUint8Array = new Uint8Array(
-        event.target?.result as ArrayBuffer
-      );
-
-      const memory = {
-        texts:
-          selectedType === "text"
-            ? [
-                {
-                  content: description,
-                  metadata: [
-                    {
-                      description: useHardcodedValues
-                        ? ["Sample text"]
-                        : [description],
-                      date: useHardcodedValues ? ["2024-10-10"] : [date],
-                      place: useHardcodedValues ? ["Test Location"] : [place],
-                      tags: useHardcodedValues
-                        ? [["test", "text"]]
-                        : [tags.split(",").map((tag) => tag.trim())],
-                      visibility: [],
-                      people: [],
-                    },
-                  ],
-                },
-              ]
-            : [],
-        images:
-          selectedType === "image"
-            ? [
-                {
-                  content: useHardcodedValues
-                    ? [0, 1, 2] // Example hardcoded byte array for demonstration
-                    : Array.from(imageUint8Array),
-                  metadata: [
-                    {
-                      description: useHardcodedValues
-                        ? ["Sample Image"]
-                        : [description],
-                      date: useHardcodedValues ? ["2024-10-10"] : [date],
-                      place: useHardcodedValues ? ["Berlin"] : [place],
-                      tags: useHardcodedValues
-                        ? [["test", "image"]]
-                        : [tags.split(",").map((tag) => tag.trim())],
-                      visibility: [],
-                      people: [],
-                    },
-                  ],
-                },
-              ]
-            : [],
-      };
-
-      try {
-        console.log(JSON.stringify(memory, null, 2));
-        await futura_backend.store_memory(memory);
-        setResponse("Upload successful!");
-      } catch (error) {
-        console.error("Error uploading:", error);
-        setResponse("Failed to upload.");
-      }
+    const memory = {
+      texts:
+        selectedType === "text"
+          ? [
+              {
+                content: useHardcodedValues
+                  ? "Sample text content"
+                  : description,
+                metadata: [
+                  {
+                    description: description ? [description] : [],
+                    date: date ? [date] : [],
+                    place: place ? [place] : [],
+                    tags: tags
+                      ? [tags.split(",").map((tag) => tag.trim())]
+                      : [],
+                    visibility: [],
+                    people: [],
+                  },
+                ],
+              },
+            ]
+          : [],
+      images:
+        selectedType === "image"
+          ? [
+              {
+                content: imageData,
+                metadata: [
+                  {
+                    description: description ? [description] : [],
+                    date: date ? [date] : [],
+                    place: place ? [place] : [],
+                    tags: tags
+                      ? [tags.split(",").map((tag) => tag.trim())]
+                      : [],
+                    visibility: [],
+                    people: [],
+                  },
+                ],
+              },
+            ]
+          : [],
     };
 
-    reader.readAsArrayBuffer(file);
+    console.log("Memory object:", JSON.stringify(memory, null, 2));
+    try {
+      console.log("Calling store_memory with:", memory);
+      await futura_backend.store_memory(memory);
+      setResponse("Upload successful!");
+    } catch (error) {
+      console.error("Error uploading:", error);
+      setResponse(`Failed to upload: ${error.message}`);
+    }
   };
 
   return (
@@ -226,7 +221,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
             />
             <Label
               htmlFor="use-hardcoded-values"
-              className="text-sm font-medium text-red "
+              className="text-sm font-medium text-red"
             >
               Use Hardcoded Values
             </Label>
