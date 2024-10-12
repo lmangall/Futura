@@ -1,5 +1,6 @@
 // import Image from "next/image";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import {
   Copy,
   File,
@@ -57,12 +58,17 @@ import {
 } from "./ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import UploadModal from "@/components/modals/UploadModal";
 import { Trash2, Download } from "lucide-react";
 
 export const description =
   "An orders dashboard with a sidebar navigation. The sidebar has icon navigation. The content area has a breadcrumb and search in the header. The main area has a list of recent orders with a filter and export button. The main area also has a detailed view of a single order with order details, shipping information, billing information, customer information, and payment information.";
 
 export default function Dashboard() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -270,7 +276,11 @@ export default function Dashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button>Add to the chain</Button>
+                  <Button onClick={handleOpenModal}>Upload</Button>
+                  <UploadModal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                  />
                 </CardFooter>
               </Card>
               {/* <Card x-chunk="dashboard-05-chunk-1">
