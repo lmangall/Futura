@@ -25,11 +25,17 @@ type Metadata = record {
 type Statistics = record {
     total_users: nat64;
     total_memory: nat64;
-}
+};
+
+type UserStats = record {
+    total_images: nat64;
+    total_texts: nat64;
+};
 
 service : {
     "greet": (text) -> (text) query;
     "store_image": (vec Image) -> ();
     "retrieve_memory": () -> (opt Memory) query;
     "get_statistics": () -> (Statistics) query;
+    "get_user_stats": () -> (UserStats) query;
 };

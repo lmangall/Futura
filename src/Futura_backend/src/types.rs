@@ -38,6 +38,12 @@ pub struct Statistics {
     pub total_memory: u64,
 }
 
+#[derive(CandidType)]
+pub struct UserStats {
+    pub total_images: u64,
+    pub total_texts: u64,
+}
+
 const MAX_VALUE_SIZE: u32 = 1000000000;
 impl Storable for UserData {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
