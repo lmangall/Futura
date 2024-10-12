@@ -5,19 +5,21 @@ use std::{borrow::Cow, cell::RefCell};
 
 // Define a struct for memory
 #[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]
-pub struct UserData {
+pub struct Capsule{
     pub texts: Vec<Text>,  
     pub images: Vec<Image>,
 }
 
 #[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]
 pub struct Text {
+    pub id: u64,
     pub content: String,
     pub metadata: Option<Metadata>,
 }
 
 #[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]
 pub struct Image {
+    pub id: u64,
     pub content: Vec<u8>,
     pub metadata: Option<Metadata>,
 }
@@ -39,13 +41,13 @@ pub struct Statistics {
 }
 
 #[derive(CandidType)]
-pub struct UserStats {
+pub struct CapsuleStats {
     pub total_images: u64,
     pub total_texts: u64,
 }
 
 const MAX_VALUE_SIZE: u32 = 1000000000;
-impl Storable for UserData {
+impl Storable for Capsule {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }

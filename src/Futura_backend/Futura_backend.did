@@ -1,19 +1,25 @@
-type Memory = record {
+// BTreeMap<Principal, Capsule>
+
+type Capsule = record {
     texts: opt vec Text;
     images: opt vec Image;
 };
 
 type Text = record {
+    id: nat64;
     content: text;
     metadata: opt Metadata;
 };
 
 type Image = record {
+    id: nat64;
     content: blob;
     metadata: opt Metadata;
 };
 
 type Metadata = record {
+    file_name: text;
+    file_type: text;
     description: opt text;
     date: opt text;
     place: opt text;
@@ -22,20 +28,21 @@ type Metadata = record {
 	people: opt vec text;
 };
 
-type Statistics = record {
-    total_users: nat64;
-    total_memory: nat64;
-};
-
-type UserStats = record {
+type CapsuleStats = record {
     total_images: nat64;
     total_texts: nat64;
 };
 
+type Stats = record {
+    capsule_number: nat64;
+    image_number: nat64;
+    texts_number: nat64;
+};
+
 service : {
     "greet": (text) -> (text) query;
-    "store_image": (vec Image) -> ();
-    "retrieve_memory": () -> (opt Memory) query;
-    "get_statistics": () -> (Statistics) query;
-    "get_user_stats": () -> (UserStats) query;
+    "store_texts": (vec Text) -> (variant { Ok : text; Err : text });
+    "store_images": (vec Image) -> (variant { Ok : text; Err : text });
+    "retrieve_images": (ids: opt vec nat64) -> (variant { Ok : vec Image; Err : text });
+    "retrieve_capsule_stats": () -> (CapsuleStats);
 };

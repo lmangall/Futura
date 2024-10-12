@@ -5,8 +5,8 @@ use candid::Principal;
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use std::cell::RefCell;
-use crate::types::{Statistics, UserData, Image, UserStats};
-// use crate::utils::validate_caller_not_anonymous;
+use crate::types::{Statistics, Capsule, Image, CapsuleStats, Text};
+use crate::utils::validate_caller_not_anonymous;
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 thread_local! {
@@ -15,65 +15,113 @@ thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
         RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
     
-    static ASSETS: RefCell<StableBTreeMap<Principal, UserData, Memory>> = RefCell::new(
+    static CAPSULES: RefCell<StableBTreeMap<Principal, Capsule, Memory>> = RefCell::new(
         StableBTreeMap::init(
             MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
         )
     );
 }
 
-// TODO: #[ic_cdk_macros::query] vs #[ic_cdk::query] - the same?
-
 #[ic_cdk::query]
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
 
-#[ic_cdk_macros::query]
-fn retrieve_memory() -> Option<UserData> {
-    // let key = validate_caller_not_anonymous(); TODO: Result instead of Option
-    let key = ic_cdk::caller();
-    ASSETS.with(|p| p.borrow().get(&key))
+#[ic_cdk::query]
+fn retrieve_images(ids: Option<Vec<u64>>) -> Result<Vec<Image>, String> {
+    let key = validate_caller_not_anonymous()
+        .map_err(|e| format!("Error: {}", e)).unwrap();
+
+    CAPSULES.with(|capsules| {
+        if let Some(capsule) = capsules.borrow().get(&key) {
+            if capsule.images.is_empty() {
+                return Err("No images found".to_string());
+            }
+            
+            // if id is provided, return only the images with the specified ids
+            if let Some(unwrapped_ids) = ids {
+                let mut images = vec![];
+                for image in capsule.images.iter() {
+                    if unwrapped_ids.contains(&image.id) {
+                        images.push(image.clone());
+                    }
+                }
+                return Ok(images);
+            }
+
+            // return all images if id is not provided
+            return Ok(capsule.images.clone());
+        } else {
+            return Err("No data found".to_string());
+        }
+    })
 }
 
-#[ic_cdk_macros::update]
-fn store_image(images: Vec<Image>) -> Option<String> {
-    // let key = validate_caller_not_anonymous(); TODO: Result instead of Option
-    let key = ic_cdk::caller();
-    ASSETS.with(|assets| {
-        let mut map = assets.borrow_mut();
+#[ic_cdk::update]
+fn store_images(images: Vec<Image>) -> Result<String, String> {
+    let user_principal = validate_caller_not_anonymous()
+        .map_err(|e| format!("Error: {}", e)).unwrap();
+    
+    CAPSULES.with(|capsules| {
+        let mut borrowed_capsules = capsules.borrow_mut();
 
         // check if the user already has memory
-        if let Some(mut data) = map.get(&key) {
-            data.images.extend(images);
-            map.insert(key, UserData {
-                texts: data.texts,
-                images: data.images,
+        if let Some(mut capsule) = borrowed_capsules.get(&user_principal) {
+            capsule.images.extend(images);
+            borrowed_capsules.insert(user_principal, Capsule {
+                texts: capsule.texts,
+                images: capsule.images,
             });
         } else {
-            map.insert(key, UserData {
+            borrowed_capsules.insert(user_principal, Capsule {
                 texts: vec![],
                 images: images,
             });
         }
     });
-    Some("Inserted".to_string())
+    Ok("Images stored successfully".to_string())
 }
 
-#[ic_cdk_macros::query]
-fn get_statistics() -> Statistics {
-    let total_users = ASSETS.with(|p| p.borrow().len() as u64);
-    let total_memory = ASSETS.with(|p| p.borrow().iter().map(|(_, m)| m).count() as u64);
-    Statistics {
-        total_users,
-        total_memory,
-    }
+#[ic_cdk::update]
+fn store_texts(texts: Vec<Text>) -> Result<String, String> {
+    let user_principal = validate_caller_not_anonymous()
+        .map_err(|e| format!("Error: {}", e)).unwrap();
+    
+    CAPSULES.with(|capsules| {
+        let mut borrowed_capsules = capsules.borrow_mut();
+
+        // check if the user already has memory
+        if let Some(mut capsule) = borrowed_capsules.get(&user_principal) {
+            capsule.texts.extend(texts);
+            borrowed_capsules.insert(user_principal, Capsule {
+                texts: capsule.texts,
+                images: capsule.images,
+            });
+        } else {
+            borrowed_capsules.insert(user_principal, Capsule {
+                texts,
+                images: vec![],
+            });
+        }
+    });
+    Ok("Texts stored successfully".to_string())
 }
 
-#[ic_cdk_macros::query]
-fn get_user_stats() -> UserStats {
+
+// #[ic_cdk::query]
+// fn get_statistics() -> Statistics {
+//     let total_users = CAPSULES.with(|p| p.borrow().len() as u64);
+//     let total_memory = CAPSULES.with(|p| p.borrow().iter().map(|(_, m)| m).count() as u64);
+//     Statistics {
+//         total_users,
+//         total_memory,
+//     }
+// }
+
+#[ic_cdk::query]
+fn retrieve_capsule_stats() -> CapsuleStats {
     let key = ic_cdk::caller();
-    let (total_images, total_texts) = ASSETS.with(|p| {
+    let (total_images, total_texts) = CAPSULES.with(|p| {
         if let Some(data) = p.borrow().get(&key) {
             (data.images.len() as u64, data.texts.len() as u64)
         } else {
@@ -81,7 +129,7 @@ fn get_user_stats() -> UserStats {
         }
     });
     
-    UserStats {
+    CapsuleStats {
         total_images,
         total_texts,
     }
