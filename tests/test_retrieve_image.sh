@@ -11,6 +11,13 @@ get_canister_id_futura_backend() {
     grep "^CANISTER_ID_FUTURA_BACKEND=" "$env_file" | cut -d '=' -f2 | tr -d '"' | tr -d "'"
 }
 
+CANDID_ARGUMENT=$(construct_retrieve_images_candid_argument)
+
+# Function to construct Candid argument
+construct_retrieve_images_candid_argument() {
+    echo "(opt vec { 1: nat64 })"
+}
+
 CANISTER_ID_FUTURA_BACKEND=$(get_canister_id_futura_backend)
 
 if [ -z "$CANISTER_ID_FUTURA_BACKEND" ]; then
@@ -28,7 +35,7 @@ else
 fi
 
 echo "Retrieving the image from the canister..."
-MEMORY_OUTPUT=$(dfx canister call "$CANISTER_ID_FUTURA_BACKEND" retrieve_memory 2>> "$ERROR_LOG_FILE")
+MEMORY_OUTPUT=$(dfx canister call "$CANISTER_ID_FUTURA_BACKEND" retrieve_images $CANDID_ARGUMENT 2> "$ERROR_LOG_FILE")
 
 if [ $? -ne 0 ]; then
     echo "Failed to retrieve the image. See $ERROR_LOG_FILE for details."

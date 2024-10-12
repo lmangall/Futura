@@ -1,13 +1,25 @@
-use candid::{CandidType, Principal}; // Add CandidType
-use ic_cdk::storage; // Storage for the canister
-use ic_cdk_macros::{post_upgrade, pre_upgrade}; // Macros for upgrade functions
-use lazy_static::lazy_static; // For creating a static, global storage
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::Mutex; // Mutex for thread safety in global storage // For serializing and deserializing data
+mod types;
+mod utils;
 
-lazy_static! {
-    static ref MEMORY_STORAGE: Mutex<HashMap<Principal, Memory>> = Mutex::new(HashMap::new());
+use candid::Principal;
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
+use std::cell::RefCell;
+use crate::types::{Statistics, Capsule, Image, CapsuleStats, Text};
+use crate::utils::validate_caller_not_anonymous;
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
+thread_local! {
+    // The memory manager is used for simulating multiple memories. Given a `MemoryId` it can
+    // return a memory that can be used by stable structures.
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+    
+    static CAPSULES: RefCell<StableBTreeMap<Principal, Capsule, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+        )
+    );
 }
 
 #[ic_cdk::query]
@@ -15,34 +27,140 @@ fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
 
-// Define a struct for memory
+#[ic_cdk::query]
+fn retrieve_images(ids: Option<Vec<u64>>) -> Result<Vec<Image>, String> {
+    let key = validate_caller_not_anonymous()
+        .map_err(|e| format!("Error: {}", e)).unwrap();
 
-#[derive(Clone, Serialize, Deserialize, CandidType)]
-struct Memory {
-    texts: Option<Vec<Text>>,   // Change to Option to allow for optionality
-    images: Option<Vec<Image>>, // Change to Option to allow for optionality
+    CAPSULES.with(|capsules| {
+        if let Some(capsule) = capsules.borrow().get(&key) {
+            if capsule.images.is_empty() {
+                return Err("No images found".to_string());
+            }
+            
+            // if id is provided, return only the images with the specified ids
+            if let Some(unwrapped_ids) = ids {
+                let mut images = vec![];
+                for image in capsule.images.iter() {
+                    if unwrapped_ids.contains(&image.id) {
+                        images.push(image.clone());
+                    }
+                }
+                return Ok(images);
+            }
+
+            // return all images if id is not provided
+            return Ok(capsule.images.clone());
+        } else {
+            return Err("No data found".to_string());
+        }
+    })
 }
 
-#[derive(Clone, Serialize, Deserialize, CandidType)]
-struct Text {
-    content: String,
-    metadata: Option<Metadata>,
+#[ic_cdk::query]
+fn retrieve_texts(ids: Option<Vec<u64>>) -> Result<Vec<Text>, String> {
+    let key = validate_caller_not_anonymous()
+        .map_err(|e| format!("Error: {}", e)).unwrap();
+
+    CAPSULES.with(|capsules| {
+        if let Some(capsule) = capsules.borrow().get(&key) {
+            if capsule.texts.is_empty() {
+                return Err("No texts found".to_string());
+            }
+            
+            // if id is provided, return only the texts with the specified ids
+            if let Some(unwrapped_ids) = ids {
+                let mut texts = vec![];
+                for text in capsule.texts.iter() {
+                    if unwrapped_ids.contains(&text.id) {
+                        texts.push(text.clone());
+                    }
+                }
+                return Ok(texts);
+            }
+
+            // return all texts if id is not provided
+            return Ok(capsule.texts.clone());
+        } else {
+            return Err("No data found".to_string());
+        }
+    })
 }
 
-#[derive(Clone, Serialize, Deserialize, CandidType)]
-struct Image {
-    content: Vec<u8>,
-    metadata: Option<Metadata>,
+#[ic_cdk::update]
+fn store_images(images: Vec<Image>) -> Result<String, String> {
+    let user_principal = validate_caller_not_anonymous()
+        .map_err(|e| format!("Error: {}", e)).unwrap();
+    
+    CAPSULES.with(|capsules| {
+        let mut borrowed_capsules = capsules.borrow_mut();
+
+        // check if the user already has memory
+        if let Some(mut capsule) = borrowed_capsules.get(&user_principal) {
+            capsule.images.extend(images);
+            // TODO: is it efficient?
+            borrowed_capsules.insert(user_principal, Capsule {
+                texts: capsule.texts,
+                images: capsule.images,
+                metadata: capsule.metadata,
+                settings: capsule.settings,
+            });
+        } else {
+            borrowed_capsules.insert(user_principal, Capsule {
+                texts: vec![],
+                images: images,
+                metadata: Default::default(),
+                settings: Default::default(),
+            });
+        }
+    });
+    Ok("Images stored successfully".to_string())
 }
 
-#[derive(Clone, Serialize, Deserialize, CandidType)]
-struct Metadata {
-    description: Option<String>, // Updated to Option
-    date: Option<String>,        // Added date field
-    place: Option<String>,
-    tags: Option<Vec<String>>,
-    people: Option<Vec<String>>,
-    visibility: Option<Vec<Principal>>,
+#[ic_cdk::update]
+fn store_texts(texts: Vec<Text>) -> Result<String, String> {
+    let user_principal = validate_caller_not_anonymous()
+        .map_err(|e| format!("Error: {}", e)).unwrap();
+    
+    CAPSULES.with(|capsules| {
+        let mut borrowed_capsules = capsules.borrow_mut();
+
+        // check if the user already has memory
+        if let Some(mut capsule) = borrowed_capsules.get(&user_principal) {
+            capsule.texts.extend(texts);
+            borrowed_capsules.insert(user_principal, Capsule {
+                texts: capsule.texts,
+                images: capsule.images,
+                metadata: capsule.metadata,
+                settings: capsule.settings,
+            });
+        } else {
+            borrowed_capsules.insert(user_principal, Capsule {
+                texts,
+                images: vec![],
+                metadata: Default::default(),
+                settings: Default::default(),
+            });
+        }
+    });
+    Ok("Texts stored successfully".to_string())
+}
+
+#[ic_cdk::query]
+fn retrieve_capsule_stats() -> CapsuleStats {
+    let key = ic_cdk::caller();
+    let (total_images, total_texts) = CAPSULES.with(|p| {
+        if let Some(data) = p.borrow().get(&key) {
+            (data.images.len() as u64, data.texts.len() as u64)
+        } else {
+            (0, 0)
+        }
+    });
+    
+    CapsuleStats {
+        total_images,
+        total_texts,
+    }
 }
 
 /* TODO: Consider size limitations for large image data. Since images can be large,
@@ -50,57 +168,8 @@ struct Metadata {
      fits within the limits of stable memory.
 */
 
-// Serialize and store the state before upgrading
-#[pre_upgrade]
-fn pre_upgrade() {
-    let storage = MEMORY_STORAGE.lock().unwrap();
-    let serialized_data =
-        serde_json::to_vec(&*storage).expect("Failed to serialize memory storage");
-    storage::stable_save((serialized_data,)).expect("Failed to save to stable memory");
-}
-
-// Deserialize and restore the state after upgrading
-#[post_upgrade]
-fn post_upgrade() {
-    let (serialized_data,): (Vec<u8>,) =
-        ic_cdk::storage::stable_restore().expect("Failed to restore from stable memory");
-    let deserialized_storage: HashMap<Principal, Memory> =
-        serde_json::from_slice(&serialized_data).expect("Failed to deserialize memory storage");
-    let mut storage = MEMORY_STORAGE.lock().unwrap();
-    *storage = deserialized_storage;
-}
-
 /*
 TODO: Consider handling large images more efficiently.
 For example, add image compression or splitting large images into chunks.
 This will help prevent issues with memory usage or storage limitations, especially as images could be large.
 */
-
-// Function to store a memory
-// #[ic_cdk::update]
-// fn store_memory(texts: Vec<Text>, images: Vec<Image>) {
-//     let caller = ic_cdk::caller();
-//     let memory = Memory {
-//         texts: Some(texts),   // Wrap texts in Some
-//         images: Some(images), // Wrap images in Some
-//     };
-
-//     let mut storage = MEMORY_STORAGE.lock().unwrap();
-//     storage.insert(caller, memory);
-// }
-
-// Claude version
-#[ic_cdk::update]
-fn store_memory(memory: Memory) {
-    let caller = ic_cdk::caller();
-    let mut storage = MEMORY_STORAGE.lock().unwrap();
-    storage.insert(caller, memory);
-}
-
-// Function to retrieve a memory for the caller
-#[ic_cdk::query]
-fn retrieve_memory() -> Option<Memory> {
-    let caller = ic_cdk::caller();
-    let storage = MEMORY_STORAGE.lock().unwrap();
-    storage.get(&caller).cloned()
-}
