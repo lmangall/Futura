@@ -5,7 +5,7 @@ use candid::Principal;
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use std::cell::RefCell;
-use crate::types::{Statistics, UserData, AddImages};
+use crate::types::{Statistics, UserData, Image};
 // use crate::utils::validate_caller_not_anonymous;
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
@@ -37,7 +37,7 @@ fn retrieve_memory() -> Option<UserData> {
 }
 
 #[ic_cdk_macros::update]
-fn store_image(memory: AddImages) -> Option<String> {
+fn store_image(images: Vec<Image>) -> Option<String> {
     // let key = validate_caller_not_anonymous(); TODO: Result instead of Option
     let key = ic_cdk::caller();
     ASSETS.with(|assets| {
@@ -45,11 +45,11 @@ fn store_image(memory: AddImages) -> Option<String> {
 
         // check if the user already has memory
         if let Some(mut data) = map.get(&key) {
-            data.images.extend(memory.images);
+            data.images.extend(images);
         } else {
             map.insert(key, UserData {
                 texts: vec![],
-                images: memory.images,
+                images: images,
             });
         }
     });

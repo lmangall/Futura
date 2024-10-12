@@ -37,8 +37,7 @@ encode_image() {
 # Function to construct Candid argument
 construct_candid_argument() {
     local image_content="$1"
-    echo "(record { 
-        images = vec { 
+    echo "(vec { 
             record { 
                 content = blob \"$image_content\"; 
                 metadata = opt record { 
@@ -50,8 +49,7 @@ construct_candid_argument() {
                     people = opt vec {}; 
                 } 
             } 
-        } 
-    })"
+        })"
 }
 
 # Prompt user for test type

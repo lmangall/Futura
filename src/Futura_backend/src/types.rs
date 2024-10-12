@@ -10,12 +10,6 @@ pub struct UserData {
     pub images: Vec<Image>,
 }
 
-// Define a struct for memory
-#[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]
-pub struct AddImages {
-    pub images: Vec<Image>,
-}
-
 #[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]
 pub struct Text {
     pub content: String,

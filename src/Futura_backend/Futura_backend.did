@@ -3,10 +3,6 @@ type Memory = record {
     images: opt vec Image;
 };
 
-type AddImages = record {
-    images: vec Image;
-};
-
 type Text = record {
     content: text;
     metadata: opt Metadata;
@@ -33,7 +29,7 @@ type Statistics = record {
 
 service : {
     "greet": (text) -> (text) query;
-    "store_image": (AddImages) -> ();
+    "store_image": (vec Image) -> ();
     "retrieve_memory": () -> (opt Memory) query;
     "get_statistics": () -> (Statistics) query;
 };
