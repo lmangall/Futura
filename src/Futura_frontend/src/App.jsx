@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import Authentication from "./components/Authentication";
 import { Hero } from "@/components/Hero";
+import { Pricing } from "@/components/Pricing";
 // import MemoryForm from "./components/MemoryForm";
 // import ImageUploadForm from "./components/ImageUploadForm";
 // import { Button } from "./components/ui/button";
@@ -35,6 +36,7 @@ function App() {
           element={
             <main className="flex flex-col items-center p-6">
               <Hero />
+              <Pricing />
               {/* <img
                 src="/logo2.svg"
                 alt="DFINITY logo"
