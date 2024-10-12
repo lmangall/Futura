@@ -6,6 +6,7 @@ import MemoryForm from "./components/MemoryForm";
 import ImageUploadForm from "./components/ImageUploadForm";
 // import Greeting from "./components/Greeting";
 import Dashboard from "./components/Dashboard";
+import Authentication from "./components/Authentication";
 import { Button } from "./components/ui/button";
 import UploadModal from "@/components/modals/UploadModal";
 
@@ -73,6 +74,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/authentication" element={<Authentication />} />
         {/* Route for the Home  */}
         <Route
           path="/"
@@ -135,6 +137,9 @@ function App() {
               <Button onClick={handleOpenModal}>Upload</Button>
               <UploadModal isOpen={isModalOpen} onClose={handleCloseModal} />
               <ImageUploadForm />
+              <Button>
+                <Link to="/authentication">log in</Link>
+              </Button>
             </main>
           }
         />
