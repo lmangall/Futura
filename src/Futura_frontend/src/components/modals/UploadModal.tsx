@@ -19,27 +19,7 @@ const Metadata = IDL.Record({
   people: IDL.Opt(IDL.Vec(IDL.Text)),
 });
 
-const TextType = IDL.Record({
-  content: IDL.Text,
-  metadata: IDL.Opt(Metadata),
-});
-
-const ImageType = IDL.Record({
-  content: IDL.Vec(IDL.Nat8),
-  metadata: IDL.Opt(Metadata),
-});
-
-const MemoryType = IDL.Record({
-  texts: IDL.Opt(IDL.Vec(TextType)),
-  images: IDL.Opt(IDL.Vec(ImageType)),
-});
-
-interface UploadModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
+const UploadModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const [selectedType, setSelectedType] = useState<"text" | "image">("text");
@@ -159,16 +139,16 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
             <Label htmlFor="date" className="text-sm font-medium">
               Date
             </Label>
-            <Textarea
+            <Input
               id="date"
-              placeholder="Type the date here."
+              type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
             <Label htmlFor="place" className="text-sm font-medium">
               Place
             </Label>
-            <Textarea
+            <Input
               id="place"
               placeholder="Type the place here."
               value={place}
@@ -177,7 +157,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
             <Label htmlFor="tags" className="text-sm font-medium">
               Tags
             </Label>
-            <Textarea
+            <Input
               id="tags"
               placeholder="Type your tags here, separated by commas."
               value={tags}
@@ -186,7 +166,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
             <Label htmlFor="visibility" className="text-sm font-medium">
               Visibility
             </Label>
-            <Textarea
+            <Input
               id="visibility"
               placeholder="Type visibility (e.g., user IDs) here."
               value={visibility}
@@ -195,7 +175,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
             <Label htmlFor="people" className="text-sm font-medium">
               People
             </Label>
-            <Textarea
+            <Input
               id="people"
               placeholder="Type names or IDs of people here."
               value={people}
@@ -208,7 +188,6 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
               id="use-hardcoded-values"
               checked={useHardcodedValues}
               onChange={() => setUseHardcodedValues((prev) => !prev)}
-              className="mr-2"
             />
             <Label
               htmlFor="use-hardcoded-values"
@@ -216,15 +195,6 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
             >
               Use Hardcoded Values
             </Label>
-          </div>
-          <div className="border-2 border-dashed border-gray-200 rounded-lg flex flex-col gap-1 p-6 items-center">
-            <File className="w-12 h-12" />
-            <span className="text-sm font-medium text-gray-500">
-              Drag and drop a file or click to browse
-            </span>
-            <span className="text-xs text-gray-500">
-              Only text or image supported
-            </span>
           </div>
           <div className="space-y-2 text-sm">
             <Label htmlFor="file" className="text-sm font-medium">
@@ -248,4 +218,6 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       </Card>
     </Modal>
   );
-}
+};
+
+export default UploadModal;
