@@ -22,8 +22,14 @@ type Metadata = record {
 	people: opt vec text;
 };
 
+type Statistics = record {
+    total_memories: nat64;
+    total_users: nat64;
+}
+
 service : {
     "greet": (text) -> (text) query;
     "store_memory": (Memory) -> ();
-    "retrieve_memory": () -> (opt Memory) query;
+    "retrieve_memory": () -> (opt vec Memory) query;
+    "get_statistics": () -> (Statistics) query;
 };
