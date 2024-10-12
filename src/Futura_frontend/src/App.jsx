@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { futura_backend } from "declarations/futura_backend";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import MemoryForm from "./components/MemoryForm";
-import ImageUploadForm from "./components/ImageUploadForm";
 import Dashboard from "./components/Dashboard";
 import Authentication from "./components/Authentication";
-import { Button } from "./components/ui/button";
-import UploadModal from "@/components/modals/UploadModal";
+import { Hero } from "@/components/Hero";
+// import MemoryForm from "./components/MemoryForm";
+// import ImageUploadForm from "./components/ImageUploadForm";
+// import { Button } from "./components/ui/button";
+// import UploadModal from "@/components/modals/UploadModal";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -32,8 +33,9 @@ function App() {
         <Route
           path="/"
           element={
-            <main className="flex flex-col items-center p-6 bg-pink-100">
-              <img
+            <main className="flex flex-col items-center p-6">
+              <Hero />
+              {/* <img
                 src="/logo2.svg"
                 alt="DFINITY logo"
                 className="max-w-[50vw] max-h-[25vw] block m-auto"
@@ -50,7 +52,7 @@ function App() {
               <ImageUploadForm />
               <Button>
                 <Link to="/authentication">Log in</Link>
-              </Button>
+              </Button> */}
             </main>
           }
         />
