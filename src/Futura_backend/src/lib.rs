@@ -91,10 +91,30 @@ This will help prevent issues with memory usage or storage limitations, especial
 
 // Claude version
 #[ic_cdk::update]
-fn store_memory(memory: Memory) {
+fn store_memory(memory: Memory) -> Result<(String, usize), String> {
     let caller = ic_cdk::caller();
     let mut storage = MEMORY_STORAGE.lock().unwrap();
+
+    let previous_count = storage
+        .get(&caller)
+        .and_then(|mem| mem.images.as_ref().map(|images| images.len()))
+        .unwrap_or(0);
+
     storage.insert(caller, memory);
+
+    let new_count = storage
+        .get(&caller)
+        .and_then(|mem| mem.images.as_ref().map(|images| images.len()))
+        .unwrap_or(0);
+
+    if new_count > previous_count {
+        Ok(("The number of images has increased.".to_string(), new_count))
+    } else {
+        Err(format!(
+            "The number of images has not increased. Previous: {}, New: {}",
+            previous_count, new_count
+        ))
+    }
 }
 
 // Function to retrieve a memory for the caller
