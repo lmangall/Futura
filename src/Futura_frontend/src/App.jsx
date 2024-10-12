@@ -3,17 +3,20 @@ import { futura_backend } from "declarations/futura_backend";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import PlugConnect from "@psychedelic/plug-connect";
 import MemoryForm from "./components/MemoryForm";
-import ImageUploadForm from "./components/ImageUploadForm";
-import Greeting from "./components/Greeting";
-import { Checkbox } from "@/components/ui/checkbox";
-import { CheckboxDemo } from "./components/CheckboxDemo";
+// import ImageUploadForm from "./components/ImageUploadForm";
+// import Greeting from "./components/Greeting";
 import Dashboard from "./components/Dashboard";
-// import { Button } from "@/components/ui/button";
+import { Button } from "./components/ui/button";
+import UploadModal from "@/components/modals/UploadModal";
 
 function App() {
   const [greeting, setGreeting] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [principal, setPrincipal] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   const verifyConnectionAndAgent = async () => {
     const whitelist = [process.env.VITE_CANISTER_ID_FUTURA_BACKEND];
@@ -120,19 +123,18 @@ function App() {
                       Logout
                     </button>
                   </button>
+                  <div>
+                    <Button>
+                      <Link to="/dashboard">Go to Dashboard</Link>
+                    </Button>
+                  </div>{" "}
                   <MemoryForm />
                 </>
               )}
-              <Greeting />
-              <ImageUploadForm />
-              <br />
-              <Checkbox />
-              <br />
-
-              <CheckboxDemo />
-              <div>
-                <Link to="/dashboard">Dashboard</Link>
-              </div>
+              {/* <Greeting /> */}
+              {/* <ImageUploadForm /> */}
+              <Button onClick={handleOpenModal}>Upload</Button>
+              <UploadModal isOpen={isModalOpen} onClose={handleCloseModal} />
             </main>
           }
         />
