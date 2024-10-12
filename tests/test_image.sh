@@ -37,34 +37,26 @@ encode_image() {
 # Function to construct Candid argument
 construct_candid_argument() {
     local image_content="$1"
-    echo "(record { 
-        texts = opt vec { 
-            record { 
-                content = \"Sample text\"; 
-                metadata = opt record { 
-                    description = opt \"Text description\";
-                    date = opt \"2024-10-10\";
-                    place = opt \"Test Location\";
-                    tags = opt vec { \"test\"; \"text\" };
-                    visibility = opt vec {};
-                    people = opt vec {};
-                }
-            } 
-        }; 
-        images = opt vec { 
-            record { 
+    // image content divided by 4
+    local image_content_1=$(echo $image_content | cut -c1-1000)
+    echo "(vec { 
+            record {
+                id = 2;
                 content = blob \"$image_content\"; 
-                metadata = opt record { 
+                metadata = record {
+                    file_name = \"2024-10-10\";
+                    file_type = \"2024-10-10\";
+                    file_size = 2024;
                     description = opt \"Sample Image\"; 
                     date = opt \"2024-10-10\"; 
                     place = opt \"Berlin\"; 
                     tags = opt vec { \"test\"; \"image\" }; 
                     visibility = opt vec {}; 
-                    people = opt vec {}; 
+                    people = opt vec {};
+                    preview = opt blob \"$image_content_1\";
                 } 
             } 
-        } 
-    })"
+        })"
 }
 
 # Prompt user for test type
@@ -94,24 +86,32 @@ CANDID_ARGUMENT=$(construct_candid_argument "$IMAGE_BINARY")
 # echo "$CANDID_ARGUMENT" >> "$CANDID_LOG_FILE"
 
 echo "Storing image to the canister..."
-dfx canister call "$CANISTER_ID_FUTURA_BACKEND" store_memory "$CANDID_ARGUMENT" > store_output.log 2>> "$ERROR_LOG_FILE"
+dfx canister call "$CANISTER_ID_FUTURA_BACKEND" store_images "$CANDID_ARGUMENT" > store_output.log 2>> "$ERROR_LOG_FILE"
 
 if [ $? -ne 0 ]; then
     echo "Failed to store the image. See $ERROR_LOG_FILE for details."
     exit 1
 fi
 
+RETRIEVE_IMAGES=$(construct_retrieve_images_candid_argument)
+
+# Function to construct Candid argument
+construct_retrieve_images_candid_argument() {
+    echo "(opt vec { 1: nat64 })"
+}
+
 # Retrieve the stored memory
 echo "Retrieving the image from the canister..."
-MEMORY_OUTPUT=$(dfx canister call "$CANISTER_ID_FUTURA_BACKEND" retrieve_memory 2>> "$ERROR_LOG_FILE")
+MEMORY_OUTPUT=$(dfx canister call "$CANISTER_ID_FUTURA_BACKEND" retrieve_images $RETRIEVE_IMAGES 2>> "$ERROR_LOG_FILE")
 
 if [ $? -ne 0 ]; then
     echo "Failed to retrieve the image. See $ERROR_LOG_FILE for details."
     exit 1
 fi
 
+# Only preview image is retrieved
 # Extract the blob image from the memory output (macOS compatible)
-IMAGE_BINARY=$(echo "$MEMORY_OUTPUT" | sed -n 's/.*content = blob "\([^"]*\)".*/\1/p')
+IMAGE_BINARY=$(echo "$MEMORY_OUTPUT" | sed -n 's/.*preview = opt blob "\([^"]*\)".*/\1/p')
 
 if [ -z "$IMAGE_BINARY" ]; then
     echo "No image found in the retrieved memory."
