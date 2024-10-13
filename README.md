@@ -12,6 +12,7 @@ Participate in an ICP hackathon, get a self introduction to Rust and deploy a fu
 
 - **Backend:** Rust, Internet Computer Protocol (ICP)
 - **Frontend:** React, TypeScript, Vite, Shadcn UI
+- **Authentication** Plug wallet
 
 ## Team
 
