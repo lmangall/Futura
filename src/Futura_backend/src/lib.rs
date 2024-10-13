@@ -181,6 +181,7 @@ fn retrieve_capsule_stats() -> CapsuleStats {
 
 #[ic_cdk::query]
 fn check_caller() -> Result<bool, String> {
+    ic_cdk::println!("check_caller function has been hit");
     // Use the validation function and return the error formatted as a String
     if let Err(e) = validate_caller_not_anonymous() {
         return Err(format!("Error: {}", e));
