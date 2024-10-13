@@ -54,7 +54,12 @@ const CapsuleType = IDL.Record({
   metadata: CapsuleMetadata,
 });
 
-const UploadModal = ({ isOpen, onClose }) => {
+type UploadModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
   if (!isOpen) return null;
 
   const [selectedType, setSelectedType] = useState<"text" | "image">("text");
@@ -67,7 +72,7 @@ const UploadModal = ({ isOpen, onClose }) => {
   const [date, setDate] = useState<string | null>("2024-13-10");
   const [place, setPlace] = useState<string | null>("Lissabon");
   const [tags, setTags] = useState<string[] | null>(["tag1", "tag2"]);
-  const [visibilityInput, setVisibilityInput] = useState<Principal[] | null>([Principal.fromText("aaaaa-aa")]);
+  const [visibilityInput, setVisibilityInput] = useState<Principal[] | null>([Principal.fromText("aaaaa-aa")]); // Maintain initial state
   //   const [people, setPeople] = useState<string[] | null>(["Alice", "Bob"]);
   //   const [peopleInput, setPeopleInput] = useState<string[] | []>(["Alice", "Bob"]);
   const [peopleInput, setPeopleInput] = useState<string[]>([]);
@@ -105,7 +110,7 @@ const UploadModal = ({ isOpen, onClose }) => {
       tags: tags ? ([tags] as [string[]]) : ([] as []),
       visibility: visibilityInput ? ([visibilityInput] as [Principal[]]) : ([] as []),
       people: peopleInput ? ([peopleInput] as [string[]]) : ([[]] as unknown as []),
-      preview: preview ? ([Array.from(preview)] as [number[]]) : ([[]] as unknown as []), // Ensure preview is wrapped in an array
+      preview: preview ? ([Array.from(preview)] as [number[]]) : ([[]] as unknown as []),
     };
 
     try {
@@ -132,8 +137,8 @@ const UploadModal = ({ isOpen, onClose }) => {
       }
       setResponse("Upload successful!");
     } catch (error) {
-      console.error("Error uploading:", error);
-      setResponse(`Failed to upload: ${error.message}`);
+      console.error("Error uploading:", error as Error);
+      setResponse(`Failed to upload: ${(error as Error).message}`);
     }
   };
 
@@ -162,20 +167,20 @@ const UploadModal = ({ isOpen, onClose }) => {
             <Textarea
               id="description"
               placeholder="Type your description here."
-              value={descriptionInput}
+              value={descriptionInput || ""} // Ensure value is always a string
               onChange={(e) => setDescriptionInput(e.target.value)}
             />
             <Label htmlFor="date" className="text-sm font-medium">
               Date
             </Label>
-            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <Input id="date" type="date" value={date || ""} onChange={(e) => setDate(e.target.value)} />
             <Label htmlFor="place" className="text-sm font-medium">
               Place
             </Label>
             <Input
               id="place"
               placeholder="Type the place here."
-              value={place}
+              value={place || ""} // Ensure value is always a string
               onChange={(e) => setPlace(e.target.value)}
             />
             <Label htmlFor="tags" className="text-sm font-medium">
@@ -184,17 +189,20 @@ const UploadModal = ({ isOpen, onClose }) => {
             <Input
               id="tags"
               placeholder="Type your tags here, separated by commas."
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
+              value={tags ? tags.join(", ") : ""} // Convert array to string for input display
+              onChange={(e) => setTags(e.target.value.split(",").map((tag) => tag.trim()))} // Convert string back to array
             />
             <Label htmlFor="visibility" className="text-sm font-medium">
               Visibility
             </Label>
             <Input
               id="visibility"
-              placeholder="Type visibility (e.g., user IDs) here."
-              value={visibility}
-              onChange={(e) => setVisibility(e.target.value)}
+              placeholder="Type visibility (e.g., user IDs) here, separated by commas."
+              value={visibilityInput ? visibilityInput.map((principal) => principal.toString()).join(", ") : ""} // Convert array to string for input display
+              onChange={(e) => {
+                const ids = e.target.value.split(",").map((id) => id.trim());
+                setVisibilityInput(ids.length > 0 ? ids.map((id) => Principal.fromText(id)) : null); // Convert string back to array of Principals or set to null
+              }}
             />
             <Label htmlFor="people" className="text-sm font-medium">
               People
@@ -202,8 +210,8 @@ const UploadModal = ({ isOpen, onClose }) => {
             <Input
               id="people"
               placeholder="Type names or IDs of people here."
-              value={peopleInput}
-              onChange={(e) => setPeopleInput(e.target.value)}
+              value={peopleInput.join(", ")} // Convert array to string for input display
+              onChange={(e) => setPeopleInput(e.target.value.split(",").map((name) => name.trim()))} // Convert string back to array
             />
           </div>
           <div className="space-y-2 text-sm">
