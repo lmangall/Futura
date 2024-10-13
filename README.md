@@ -4,6 +4,10 @@
 
 Futura is a secure, decentralized digital vault built on the Internet Computer Protocol (ICP), designed to preserve and share your most important life stories, photos, videos, and documents across generations. By leveraging ICP’s decentralized infrastructure, Futura ensures that your personal memories are stored securely and remain accessible for the future. It offers a user-friendly platform where users can create, safeguard, and pass down their legacies with confidence.
 
+## Motivation
+Participate in an ICP hackathon, get a self introduction to Rust and deploy a full (fron-end and back-end) app on chain) in 3 days and 3 persons.
+[Pitch-deck](https://github.com/lmangall/Futura/blob/main/src/Futura_frontend/public/Futura_pitch-deck.pdf)
+
 ## Technology Stack
 
 - **Backend:** Rust, Internet Computer Protocol (ICP)
