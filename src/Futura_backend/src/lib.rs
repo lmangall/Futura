@@ -8,7 +8,7 @@ use std::cell::RefCell;
 // full:
 // use crate::types::{Statistics, Capsule, Image, CapsuleStats, Text};
 //partial:
-use crate::types::{Capsule, Image, CapsuleStats, Text};
+use crate::types::{Capsule, CapsuleStats, Image, Text};
 
 use crate::utils::validate_caller_not_anonymous;
 type Memory = VirtualMemory<DefaultMemoryImpl>;
@@ -18,7 +18,7 @@ thread_local! {
     // return a memory that can be used by stable structures.
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
         RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
-    
+
     static CAPSULES: RefCell<StableBTreeMap<Principal, Capsule, Memory>> = RefCell::new(
         StableBTreeMap::init(
             MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
@@ -33,15 +33,15 @@ fn greet(name: String) -> String {
 
 #[ic_cdk::query]
 fn retrieve_images(ids: Option<Vec<u64>>) -> Result<Vec<Image>, String> {
-    let key = validate_caller_not_anonymous()
-        .map_err(|e| format!("Error: {}", e)).unwrap();
+    ic_cdk::println!("store_images function has been hit");
+    let key = validate_caller_not_anonymous().map_err(|e| format!("Error: {}", e)).unwrap();
 
     CAPSULES.with(|capsules| {
         if let Some(capsule) = capsules.borrow().get(&key) {
             if capsule.images.is_empty() {
                 return Err("No images found".to_string());
             }
-            
+
             // if id is provided, return only the images with the specified ids
             if let Some(unwrapped_ids) = ids {
                 let mut images = vec![];
@@ -63,15 +63,14 @@ fn retrieve_images(ids: Option<Vec<u64>>) -> Result<Vec<Image>, String> {
 
 #[ic_cdk::query]
 fn retrieve_texts(ids: Option<Vec<u64>>) -> Result<Vec<Text>, String> {
-    let key = validate_caller_not_anonymous()
-        .map_err(|e| format!("Error: {}", e)).unwrap();
+    let key = validate_caller_not_anonymous().map_err(|e| format!("Error: {}", e)).unwrap();
 
     CAPSULES.with(|capsules| {
         if let Some(capsule) = capsules.borrow().get(&key) {
             if capsule.texts.is_empty() {
                 return Err("No texts found".to_string());
             }
-            
+
             // if id is provided, return only the texts with the specified ids
             if let Some(unwrapped_ids) = ids {
                 let mut texts = vec![];
@@ -93,9 +92,9 @@ fn retrieve_texts(ids: Option<Vec<u64>>) -> Result<Vec<Text>, String> {
 
 #[ic_cdk::update]
 fn store_images(images: Vec<Image>) -> Result<String, String> {
-    let user_principal = validate_caller_not_anonymous()
-        .map_err(|e| format!("Error: {}", e)).unwrap();
-    
+    let user_principal =
+        validate_caller_not_anonymous().map_err(|e| format!("Error: {}", e)).unwrap();
+
     CAPSULES.with(|capsules| {
         let mut borrowed_capsules = capsules.borrow_mut();
 
@@ -103,19 +102,25 @@ fn store_images(images: Vec<Image>) -> Result<String, String> {
         if let Some(mut capsule) = borrowed_capsules.get(&user_principal) {
             capsule.images.extend(images);
             // TODO: is it efficient?
-            borrowed_capsules.insert(user_principal, Capsule {
-                texts: capsule.texts,
-                images: capsule.images,
-                metadata: capsule.metadata,
-                settings: capsule.settings,
-            });
+            borrowed_capsules.insert(
+                user_principal,
+                Capsule {
+                    texts: capsule.texts,
+                    images: capsule.images,
+                    metadata: capsule.metadata,
+                    settings: capsule.settings,
+                },
+            );
         } else {
-            borrowed_capsules.insert(user_principal, Capsule {
-                texts: vec![],
-                images: images,
-                metadata: Default::default(),
-                settings: Default::default(),
-            });
+            borrowed_capsules.insert(
+                user_principal,
+                Capsule {
+                    texts: vec![],
+                    images: images,
+                    metadata: Default::default(),
+                    settings: Default::default(),
+                },
+            );
         }
     });
     Ok("Images stored successfully".to_string())
@@ -123,28 +128,34 @@ fn store_images(images: Vec<Image>) -> Result<String, String> {
 
 #[ic_cdk::update]
 fn store_texts(texts: Vec<Text>) -> Result<String, String> {
-    let user_principal = validate_caller_not_anonymous()
-        .map_err(|e| format!("Error: {}", e)).unwrap();
-    
+    let user_principal =
+        validate_caller_not_anonymous().map_err(|e| format!("Error: {}", e)).unwrap();
+
     CAPSULES.with(|capsules| {
         let mut borrowed_capsules = capsules.borrow_mut();
 
         // check if the user already has memory
         if let Some(mut capsule) = borrowed_capsules.get(&user_principal) {
             capsule.texts.extend(texts);
-            borrowed_capsules.insert(user_principal, Capsule {
-                texts: capsule.texts,
-                images: capsule.images,
-                metadata: capsule.metadata,
-                settings: capsule.settings,
-            });
+            borrowed_capsules.insert(
+                user_principal,
+                Capsule {
+                    texts: capsule.texts,
+                    images: capsule.images,
+                    metadata: capsule.metadata,
+                    settings: capsule.settings,
+                },
+            );
         } else {
-            borrowed_capsules.insert(user_principal, Capsule {
-                texts,
-                images: vec![],
-                metadata: Default::default(),
-                settings: Default::default(),
-            });
+            borrowed_capsules.insert(
+                user_principal,
+                Capsule {
+                    texts,
+                    images: vec![],
+                    metadata: Default::default(),
+                    settings: Default::default(),
+                },
+            );
         }
     });
     Ok("Texts stored successfully".to_string())
@@ -160,7 +171,7 @@ fn retrieve_capsule_stats() -> CapsuleStats {
             (0, 0)
         }
     });
-    
+
     CapsuleStats {
         total_images,
         total_texts,

@@ -70,7 +70,7 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
   const [fileTypeInput, setfileTypeInput] = useState<string>("image/jpeg");
   const [fileSizeInput, setfileSizeInput] = useState<bigint>(BigInt(1000));
   const [descriptionInput, setDescriptionInput] = useState<string | null>("An exmple image or an example text.");
-  const [date, setDate] = useState<string | null>("2024-13-10");
+  const [date, setDate] = useState<string | null>("2024-10-10");
   const [place, setPlace] = useState<string | null>("Lissabon");
   const [tags, setTags] = useState<string[] | null>(["tag1", "tag2"]);
   const [visibilityInput, setVisibilityInput] = useState<Principal[] | null>([Principal.fromText("aaaaa-aa")]); // Maintain initial state
