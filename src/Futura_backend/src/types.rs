@@ -1,7 +1,14 @@
-use candid::{CandidType, Decode, Deserialize, Encode, Principal};
+// Partial:
+use candid::{CandidType, Decode, Encode, Principal};
 use serde::{Serialize, Deserialize as SerdeDeserialize};
-use ic_stable_structures::{storable::Bound, DefaultMemoryImpl, StableBTreeMap, Storable};
-use std::{borrow::Cow, cell::RefCell};
+use ic_stable_structures::{storable::Bound, Storable};
+use std::{borrow::Cow};
+
+// Full:
+// use candid::{CandidType, Decode, Deserialize, Encode, Principal};
+// use serde::{Serialize, Deserialize as SerdeDeserialize};
+// use ic_stable_structures::{storable::Bound, DefaultMemoryImpl, StableBTreeMap, Storable};
+// use std::{borrow::Cow, cell::RefCell};
 
 // Define a struct for memory
 #[derive(Clone, Serialize, SerdeDeserialize, CandidType, Debug)]

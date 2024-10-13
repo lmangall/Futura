@@ -5,7 +5,11 @@ use candid::Principal;
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use std::cell::RefCell;
-use crate::types::{Statistics, Capsule, Image, CapsuleStats, Text};
+// full:
+// use crate::types::{Statistics, Capsule, Image, CapsuleStats, Text};
+//partial:
+use crate::types::{Capsule, Image, CapsuleStats, Text};
+
 use crate::utils::validate_caller_not_anonymous;
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
