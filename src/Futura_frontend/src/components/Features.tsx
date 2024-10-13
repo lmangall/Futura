@@ -1,10 +1,7 @@
 import {
-  BarChartHorizontal,
   MessageCircleMore,
   MessagesSquare,
-  Layers,
   UserRoundPen,
-  ZoomIn,
   Cylinder,
   ShieldCheck,
   Contact,
