@@ -3,12 +3,16 @@ import { futura_backend } from "declarations/futura_backend";
 import { IDL } from "@dfinity/candid";
 
 const Metadata = IDL.Record({
+  file_name: IDL.Text,
+  file_type: IDL.Text,
+  file_size: IDL.Nat64,
   description: IDL.Opt(IDL.Text),
   date: IDL.Opt(IDL.Text),
   place: IDL.Opt(IDL.Text),
   tags: IDL.Opt(IDL.Vec(IDL.Text)),
   visibility: IDL.Opt(IDL.Vec(IDL.Principal)),
   people: IDL.Opt(IDL.Vec(IDL.Text)),
+  preview: IDL.Opt(IDL.Vec(IDL.Nat8)), // blob is represented as Vec<Nat8> in IDL
 });
 
 const TextType = IDL.Record({
@@ -114,11 +118,7 @@ const ImageUpload = () => {
         />
         {imagePreview && (
           <div className="mt-4">
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-full h-auto rounded-lg shadow-md"
-            />
+            <img src={imagePreview} alt="Preview" className="w-full h-auto rounded-lg shadow-md" />
           </div>
         )}
         <button
