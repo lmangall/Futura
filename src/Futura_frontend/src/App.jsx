@@ -10,6 +10,8 @@ import { Team } from "./components/Team";
 import { Features } from "./components/Features";
 import { Logos } from "./components/Logos";
 import GreetComponent from "./components/GreetComponent";
+import RetrieveCapsuleStatsComponent from "./components/RetrieveCapsuleStatsComponent";
+import CheckCaller from "./components/CheckCaller";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -43,6 +45,8 @@ function App() {
               <Team />
               <Logos />
               <GreetComponent />
+              <RetrieveCapsuleStatsComponent />
+              <CheckCaller />
             </main>
           }
         />

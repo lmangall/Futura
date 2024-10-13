@@ -163,6 +163,7 @@ fn store_texts(texts: Vec<Text>) -> Result<String, String> {
 
 #[ic_cdk::query]
 fn retrieve_capsule_stats() -> CapsuleStats {
+    ic_cdk::println!("retrieve_capsule_stats function has been hit");
     let key = ic_cdk::caller();
     let (total_images, total_texts) = CAPSULES.with(|p| {
         if let Some(data) = p.borrow().get(&key) {
@@ -176,6 +177,15 @@ fn retrieve_capsule_stats() -> CapsuleStats {
         total_images,
         total_texts,
     }
+}
+
+#[ic_cdk::query]
+fn check_caller() -> Result<bool, String> {
+    // Use the validation function and return the error formatted as a String
+    if let Err(e) = validate_caller_not_anonymous() {
+        return Err(format!("Error: {}", e));
+    }
+    Ok(true) // Caller is not anonymous
 }
 
 /* TODO: Consider size limitations for large image data. Since images can be large,
