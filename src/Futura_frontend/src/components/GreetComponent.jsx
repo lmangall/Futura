@@ -1,37 +1,71 @@
-import React, { useState } from "react";
-import { futura_backend } from "declarations/futura_backend";
+import { useState } from "react";
+import { futura_backend } from "../../../declarations/futura_backend";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
-const GreetComponent = () => {
-  const [name, setName] = useState(""); // State for user input
+export default function GreetComponent() {
+  const [name, setName] = useState("");
   const [greetingResponse, setGreetingResponse] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const greetUser = async () => {
-    const response = await futura_backend.greet(name); // Use the user's name
-    console.log(response);
-    setGreetingResponse(response); // Store the response in state
+    if (!name.trim()) return;
+    setIsLoading(true);
+    try {
+      const response = await futura_backend.greet(name);
+      console.log(response);
+      setGreetingResponse(response);
+      setName(""); // Clear the input field
+    } catch (error) {
+      console.error("Error greeting user:", error);
+      setGreetingResponse("An error occurred while greeting. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="flex flex-col items-center p-4 bg-gray-100 rounded-lg shadow-md">
-      <input
-        type="text"
-        placeholder="Enter your name"
-        value={name}
-        onChange={(e) => setName(e.target.value)} // Update state on input change
-        className="mb-2 p-2 border border-gray-300 rounded"
-      />
-      <button
-        onClick={greetUser}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200"
-      >
-        Greet User
-      </button>
-      <p className="mt-2 text-gray-700">Check the console for the greeting response!</p>
-      {greetingResponse && ( // Conditionally render the response
-        <p className="mt-2 text-gray-800 font-semibold">Response: {greetingResponse}</p>
-      )}
-    </div>
+    <Card className="w-[350px]">
+      <CardHeader>
+        <CardTitle>Greet User</CardTitle>
+        <CardDescription>Enter your name and get a personalized greeting.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid w-full items-center gap-4">
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && greetUser()}
+            />
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-col items-start gap-4">
+        <Button onClick={greetUser} disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Please wait
+            </>
+          ) : (
+            "Greet User"
+          )}
+        </Button>
+        {greetingResponse && (
+          <Alert className="w-full">
+            <AlertTitle>Greeting Response</AlertTitle>
+            <AlertDescription>{greetingResponse}</AlertDescription>
+          </Alert>
+        )}
+      </CardFooter>
+    </Card>
   );
-};
-
-export default GreetComponent;
+}
