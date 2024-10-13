@@ -1,5 +1,6 @@
 import { Modal } from "./modal";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Principal } from "@dfinity/principal";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,37 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { futura_backend } from "../../../../declarations/futura_backend";
-
-const CapsuleType = IDL.Record({
-  texts: IDL.Opt(IDL.Vec(TextType)),
-  images: IDL.Opt(IDL.Vec(ImageType)),
-  settings: IDL.SettingsType,
-  metadata: IDL.CapsuleMetadata,
-});
-
-const SettingsType = IDL.Record({
-  language: IDL.Opt(IDL.Text),
-  visibility: IDL.Vec(IDL.Principal),
-});
-
-const TextType = IDL.Record({
-  id: IDL.Nat64,
-  content: IDL.Text,
-  metadata: IDL.Opt(Metadata),
-});
-
-const ImageType = IDL.Record({
-  id: IDL.Nat64,
-  content: IDL.Vec(IDL.Nat8),
-  metadata: IDL.Opt(Metadata),
-});
-
-const CapsuleMetadata = IDL.Record({
-  description: IDL.Opt(IDL.Text),
-  creation_date: IDL.Opt(IDL.Text),
-  name: IDL.Text,
-  id_generator: IDL.nat64,
-});
 
 const Metadata = IDL.Record({
   file_name: IDL.Text,
@@ -53,16 +23,55 @@ const Metadata = IDL.Record({
   preview: IDL.Opt(IDL.Vec(IDL.Nat8)), // blob is represented as Vec<Nat8> in IDL
 });
 
+const TextType = IDL.Record({
+  id: IDL.Nat64,
+  content: IDL.Text,
+  metadata: IDL.Opt(Metadata),
+});
+
+const ImageType = IDL.Record({
+  id: IDL.Nat64,
+  content: IDL.Vec(IDL.Nat8),
+  metadata: IDL.Opt(Metadata),
+});
+
+const SettingsType = IDL.Record({
+  language: IDL.Opt(IDL.Text),
+  visibility: IDL.Vec(IDL.Principal),
+});
+
+const CapsuleMetadata = IDL.Record({
+  description: IDL.Opt(IDL.Text),
+  creation_date: IDL.Opt(IDL.Text),
+  name: IDL.Text,
+  id_generator: IDL.Nat64,
+});
+
+const CapsuleType = IDL.Record({
+  texts: IDL.Opt(IDL.Vec(TextType)),
+  images: IDL.Opt(IDL.Vec(ImageType)),
+  settings: SettingsType,
+  metadata: CapsuleMetadata,
+});
+
 const UploadModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const [selectedType, setSelectedType] = useState<"text" | "image">("text");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [place, setPlace] = useState("");
-  const [tags, setTags] = useState("");
-  const [visibility, setVisibility] = useState("");
-  const [people, setPeople] = useState("");
+  // Metadata fields
+  const [fileName, setFileName] = useState<string>("example.jpg");
+  const [fileType, setFileType] = useState<string>("image/jpeg");
+  const [fileSize, setFileSize] = useState<BigInt>(BigInt(1024));
+  const [description, setDescription] = useState<string | null>("An exmple image or an example text.");
+  const [date, setDate] = useState<string | null>("2024-13-10");
+  const [place, setPlace] = useState<string | null>("Lissabon");
+  const [tags, setTags] = useState<string[] | null>(["tag1", "tag2"]);
+  const [visibility, setVisibility] = useState<Principal[] | null>([Principal.fromText("aaaaa-aa")]);
+  //   const [people, setPeople] = useState<string[] | null>(["Alice", "Bob"]);
+  const [people, setPeople] = useState<string[] | []>(["Alice", "Bob"]);
+
+  const [preview, setPreview] = useState<Uint8Array | null>(null);
+  // Other fields
   const [file, setFile] = useState<File | null>(null);
   const [response, setResponse] = useState("");
 
@@ -85,43 +94,41 @@ const UploadModal = ({ isOpen, onClose }) => {
     }
 
     const metadata = {
-      description: description ? [description] : [],
-      date: date ? [date] : [],
-      place: place ? [place] : [],
-      tags: tags ? [tags.split(",").map((tag) => tag.trim())] : [],
-      visibility: [],
-      people: people ? [people.split(",").map((person) => person.trim())] : [],
+      file_name: fileName,
+      file_type: fileType,
+      file_size: fileSize,
+      description: description || null,
+      date: date || null,
+      place: place || null,
+      tags: tags ? tags : null,
+      visibility: visibility ? visibility : null,
+      people: people ? ([people] as [String[]]) : [], // Ensure people is an array of arrays
+
+      preview: preview ? Array.from(preview) : null,
     };
 
-    const memory = {
-      texts:
-        selectedType === "text"
-          ? [
-              [
-                {
-                  content: description,
-                  metadata: [metadata],
-                },
-              ],
-            ]
-          : [],
-      images:
-        selectedType === "image"
-          ? [
-              [
-                {
-                  content: imageData,
-                  metadata: [metadata],
-                },
-              ],
-            ]
-          : [],
-    };
-
-    console.log("Memory object:", JSON.stringify(memory, null, 2));
     try {
-      console.log("Calling store_memory with:", memory);
-      await futura_backend.store_memory(memory);
+      if (selectedType === "image") {
+        const images = [
+          {
+            id: BigInt(0), // Assuming you want to start with id 0
+            content: imageData,
+            metadata: metadata,
+          },
+        ];
+        console.log("Calling store_images with:", images);
+        await futura_backend.store_images(images);
+      } else if (selectedType === "text") {
+        const texts = [
+          {
+            id: BigInt(0),
+            content: description,
+            metadata: [metadata], // Wrap metadata in an array
+          },
+        ];
+        console.log("Calling store_texts with:", texts);
+        await futura_backend.store_texts(texts);
+      }
       setResponse("Upload successful!");
     } catch (error) {
       console.error("Error uploading:", error);
