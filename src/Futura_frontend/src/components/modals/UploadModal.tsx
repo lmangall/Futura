@@ -64,21 +64,19 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
 
   const [selectedType, setSelectedType] = useState<"text" | "image">("text");
   // Metadata fields
+  const [imageContent, setImageContent] = useState<number[]>([]); // Add state for imageContent
+  const [textContent, setTextContent] = useState<string>(""); // Add state for textContent
   const [fileNemeInput, setfileNemeInput] = useState<string>("example.jpg");
   const [fileTypeInput, setfileTypeInput] = useState<string>("image/jpeg");
-  // file
   const [fileSizeInput, setfileSizeInput] = useState<bigint>(BigInt(1000));
   const [descriptionInput, setDescriptionInput] = useState<string | null>("An exmple image or an example text.");
   const [date, setDate] = useState<string | null>("2024-13-10");
   const [place, setPlace] = useState<string | null>("Lissabon");
   const [tags, setTags] = useState<string[] | null>(["tag1", "tag2"]);
   const [visibilityInput, setVisibilityInput] = useState<Principal[] | null>([Principal.fromText("aaaaa-aa")]); // Maintain initial state
-  //   const [people, setPeople] = useState<string[] | null>(["Alice", "Bob"]);
-  //   const [peopleInput, setPeopleInput] = useState<string[] | []>(["Alice", "Bob"]);
   const [peopleInput, setPeopleInput] = useState<string[]>([]);
-
   const [preview, setPreview] = useState<Uint8Array | null>(null);
-  // Other fields
+
   const [file, setFile] = useState<File | null>(null);
   const [response, setResponse] = useState("");
 
@@ -89,15 +87,14 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
   };
 
   const handleUpload = async () => {
-    let imageData: number[] = [];
-
     if (file) {
       const reader = new FileReader();
       const fileContent = await new Promise<ArrayBuffer>((resolve) => {
         reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
         reader.readAsArrayBuffer(file);
       });
-      imageData = Array.from(new Uint8Array(fileContent));
+      const content = Array.from(new Uint8Array(fileContent));
+      setImageContent(content); // Set imageContent state
     }
 
     const metadata = {
@@ -117,22 +114,20 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
       if (selectedType === "image") {
         const images = [
           {
-            id: BigInt(0), // Assuming you want to start with id 0
-            content: imageData,
+            id: BigInt(0),
+            content: imageContent,
             metadata: metadata,
           },
         ];
-        console.log("Calling store_images with:", images);
         await futura_backend.store_images(images);
       } else if (selectedType === "text") {
         const texts = [
           {
             id: BigInt(0),
-            content: descriptionInput,
-            metadata: [metadata], // Wrap metadata in an array
+            content: textContent, // Change here: Use textContent for the content field
+            metadata: metadata,
           },
         ];
-        console.log("Calling store_texts with:", texts);
         await futura_backend.store_texts(texts);
       }
       setResponse("Upload successful!");
@@ -168,7 +163,10 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
               id="description"
               placeholder="Type your description here."
               value={descriptionInput || ""} // Ensure value is always a string
-              onChange={(e) => setDescriptionInput(e.target.value)}
+              onChange={(e) => {
+                setDescriptionInput(e.target.value); // Set descriptionInput
+                setTextContent(e.target.value); // Also set textContent
+              }}
             />
             <Label htmlFor="date" className="text-sm font-medium">
               Date
