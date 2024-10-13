@@ -59,16 +59,18 @@ const UploadModal = ({ isOpen, onClose }) => {
 
   const [selectedType, setSelectedType] = useState<"text" | "image">("text");
   // Metadata fields
-  const [fileName, setFileName] = useState<string>("example.jpg");
-  const [fileType, setFileType] = useState<string>("image/jpeg");
-  const [fileSize, setFileSize] = useState<BigInt>(BigInt(1024));
-  const [description, setDescription] = useState<string | null>("An exmple image or an example text.");
+  const [fileNemeInput, setfileNemeInput] = useState<string>("example.jpg");
+  const [fileTypeInput, setfileTypeInput] = useState<string>("image/jpeg");
+  // file
+  const [fileSizeInput, setfileSizeInput] = useState<bigint>(BigInt(1000));
+  const [descriptionInput, setDescriptionInput] = useState<string | null>("An exmple image or an example text.");
   const [date, setDate] = useState<string | null>("2024-13-10");
   const [place, setPlace] = useState<string | null>("Lissabon");
   const [tags, setTags] = useState<string[] | null>(["tag1", "tag2"]);
-  const [visibility, setVisibility] = useState<Principal[] | null>([Principal.fromText("aaaaa-aa")]);
+  const [visibilityInput, setVisibilityInput] = useState<Principal[] | null>([Principal.fromText("aaaaa-aa")]);
   //   const [people, setPeople] = useState<string[] | null>(["Alice", "Bob"]);
-  const [people, setPeople] = useState<string[] | []>(["Alice", "Bob"]);
+  //   const [peopleInput, setPeopleInput] = useState<string[] | []>(["Alice", "Bob"]);
+  const [peopleInput, setPeopleInput] = useState<string[]>([]);
 
   const [preview, setPreview] = useState<Uint8Array | null>(null);
   // Other fields
@@ -94,17 +96,16 @@ const UploadModal = ({ isOpen, onClose }) => {
     }
 
     const metadata = {
-      file_name: fileName,
-      file_type: fileType,
-      file_size: fileSize,
-      description: description || null,
-      date: date || null,
-      place: place || null,
-      tags: tags ? tags : null,
-      visibility: visibility ? visibility : null,
-      people: people ? ([people] as [String[]]) : [], // Ensure people is an array of arrays
-
-      preview: preview ? Array.from(preview) : null,
+      file_name: fileNemeInput,
+      file_type: fileTypeInput,
+      file_size: fileSizeInput,
+      description: descriptionInput ? ([descriptionInput] as [string]) : ([] as []),
+      date: date ? ([date] as [string]) : ([] as []),
+      place: place ? ([place] as [string]) : ([] as []),
+      tags: tags ? ([tags] as [string[]]) : ([] as []),
+      visibility: visibilityInput ? ([visibilityInput] as [Principal[]]) : ([] as []),
+      people: peopleInput ? ([peopleInput] as [string[]]) : ([[]] as unknown as []),
+      preview: preview ? ([Array.from(preview)] as [number[]]) : ([[]] as unknown as []), // Ensure preview is wrapped in an array
     };
 
     try {
@@ -122,7 +123,7 @@ const UploadModal = ({ isOpen, onClose }) => {
         const texts = [
           {
             id: BigInt(0),
-            content: description,
+            content: descriptionInput,
             metadata: [metadata], // Wrap metadata in an array
           },
         ];
@@ -161,8 +162,8 @@ const UploadModal = ({ isOpen, onClose }) => {
             <Textarea
               id="description"
               placeholder="Type your description here."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={descriptionInput}
+              onChange={(e) => setDescriptionInput(e.target.value)}
             />
             <Label htmlFor="date" className="text-sm font-medium">
               Date
@@ -201,8 +202,8 @@ const UploadModal = ({ isOpen, onClose }) => {
             <Input
               id="people"
               placeholder="Type names or IDs of people here."
-              value={people}
-              onChange={(e) => setPeople(e.target.value)}
+              value={peopleInput}
+              onChange={(e) => setPeopleInput(e.target.value)}
             />
           </div>
           <div className="space-y-2 text-sm">
