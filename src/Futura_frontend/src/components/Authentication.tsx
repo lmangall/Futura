@@ -84,7 +84,7 @@ export default function AuthenticationPage() {
             <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
               <div className="absolute inset-0 bg-zinc-900" />
               <div className="relative z-20 flex items-center text-lg font-medium">
-                Futura Inc
+                Futura Inc.
               </div>
               <div className="relative z-20 mt-auto">
                 <blockquote className="space-y-2">
@@ -102,7 +102,8 @@ export default function AuthenticationPage() {
                     Log-in with Plug
                   </h1>
                   <p className="text-sm text-muted-foreground">
-                    Authenticate with your account to access the platform.
+                    Once connected you will be able to access your dashboard and
+                    manage your stored memories.
                   </p>
                 </div>
                 {isConnected ? (
