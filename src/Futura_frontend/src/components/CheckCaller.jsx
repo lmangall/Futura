@@ -84,7 +84,11 @@ const CheckCaller = () => {
       console.log("Calling check_caller...");
       const response = await actor.check_caller(); // Call the check_caller function
       console.log("Response from check_caller:", response);
-      setResult(response);
+      if ("ok" in response) {
+        setResult(response.ok);
+      } else if ("err" in response) {
+        throw new Error(response.err);
+      }
       setError(null);
     } catch (err) {
       console.error("Error calling check_caller:", err);
