@@ -1,3 +1,16 @@
+// Add this declaration at the top of your file or in a separate .d.ts file
+declare global {
+  interface Window {
+    ic: {
+      plug: {
+        agent: {
+          getPrincipal: () => any; // Adjust the return type as needed
+        };
+      };
+    };
+  }
+}
+
 import { Modal } from "./modal";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Principal } from "@dfinity/principal";
@@ -8,7 +21,15 @@ import { IDL } from "@dfinity/candid";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { futura_backend } from "../../../../declarations/futura_backend";
+// import { futura_backend } from "../../../../declarations/futura_backend";
+import {
+  idlFactory as futura_backend_idl,
+  canisterId as futura_backend_id,
+} from "../../../../declarations/futura_backend";
+
+import { Actor, HttpAgent } from "@dfinity/agent";
+// import { HttpAgent } from "@dfinity/agent";
+// import { idlFactory as futura_backend_idl, canisterId as futura_backend_id } from "dfx-generated/futura_backend";
 
 const Metadata = IDL.Record({
   file_name: IDL.Text,
@@ -86,6 +107,37 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
     }
   };
 
+  // Ensure Plug wallet is available and agent is initialized
+  const initializeAgent = async () => {
+    try {
+      if (window.ic && window.ic.plug && window.ic.plug.agent) {
+        const userPrincipal = await window.ic.plug.agent.getPrincipal();
+
+        if (!userPrincipal) {
+          throw new Error("User principal could not be retrieved.");
+        }
+
+        const userIdentity = {
+          getPrincipal: () => userPrincipal,
+          transformRequest: (request: any) => request,
+        };
+
+        const agent = new HttpAgent({ identity: userIdentity });
+
+        if (process.env.NODE_ENV !== "production") {
+          await agent.fetchRootKey();
+        }
+
+        return agent;
+      } else {
+        throw new Error("Plug wallet or agent is not available.");
+      }
+    } catch (error) {
+      console.error((error as Error).message); // Type assertion to Error
+      return null;
+    }
+  };
+
   const handleUpload = async () => {
     if (file) {
       const reader = new FileReader();
@@ -109,6 +161,17 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
       people: peopleInput ? ([peopleInput] as [string[]]) : ([[]] as unknown as []),
       preview: preview ? ([Array.from(preview)] as [number[]]) : ([[]] as unknown as []),
     };
+
+    const agent = await initializeAgent();
+    if (!agent) {
+      console.error("Agent initialization failed.");
+      return;
+    }
+
+    const futura_backend = Actor.createActor(futura_backend_idl, {
+      agent,
+      canisterId: futura_backend_id,
+    });
 
     try {
       if (selectedType === "image") {
