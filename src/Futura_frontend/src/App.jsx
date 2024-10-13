@@ -9,6 +9,7 @@ import { Testimonials } from "@/components/Testimonials";
 import { Team } from "./components/Team";
 import { Features } from "./components/Features";
 import { Logos } from "./components/Logos";
+// import { Footer } from "./components/Footer";
 // import MemoryForm from "./components/MemoryForm";
 // import ImageUploadForm from "./components/ImageUploadForm";
 // import { Button } from "./components/ui/button";
@@ -45,6 +46,7 @@ function App() {
               <Testimonials />
               <Team />
               <Logos />
+              {/* <Footer /> */}
               {/* <img
                 src="/logo2.svg"
                 alt="DFINITY logo"
