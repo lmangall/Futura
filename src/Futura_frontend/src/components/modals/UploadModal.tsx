@@ -9,13 +9,48 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { futura_backend } from "../../../../declarations/futura_backend";
 
+const CapsuleType = IDL.Record({
+  texts: IDL.Opt(IDL.Vec(TextType)),
+  images: IDL.Opt(IDL.Vec(ImageType)),
+  settings: IDL.SettingsType,
+  metadata: IDL.CapsuleMetadata,
+});
+
+const SettingsType = IDL.Record({
+  language: IDL.Opt(IDL.Text),
+  visibility: IDL.Vec(IDL.Principal),
+});
+
+const TextType = IDL.Record({
+  id: IDL.Nat64,
+  content: IDL.Text,
+  metadata: IDL.Opt(Metadata),
+});
+
+const ImageType = IDL.Record({
+  id: IDL.Nat64,
+  content: IDL.Vec(IDL.Nat8),
+  metadata: IDL.Opt(Metadata),
+});
+
+const CapsuleMetadata = IDL.Record({
+  description: IDL.Opt(IDL.Text),
+  creation_date: IDL.Opt(IDL.Text),
+  name: IDL.Text,
+  id_generator: IDL.nat64,
+});
+
 const Metadata = IDL.Record({
+  file_name: IDL.Text,
+  file_type: IDL.Text,
+  file_size: IDL.Nat64,
   description: IDL.Opt(IDL.Text),
   date: IDL.Opt(IDL.Text),
   place: IDL.Opt(IDL.Text),
   tags: IDL.Opt(IDL.Vec(IDL.Text)),
   visibility: IDL.Opt(IDL.Vec(IDL.Principal)),
   people: IDL.Opt(IDL.Vec(IDL.Text)),
+  preview: IDL.Opt(IDL.Vec(IDL.Nat8)), // blob is represented as Vec<Nat8> in IDL
 });
 
 const UploadModal = ({ isOpen, onClose }) => {
@@ -101,21 +136,13 @@ const UploadModal = ({ isOpen, onClose }) => {
           <div className="flex space-x-2">
             <Badge
               onClick={() => setSelectedType("text")}
-              className={
-                selectedType === "text"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200"
-              }
+              className={selectedType === "text" ? "bg-blue-500 text-white" : "bg-gray-200"}
             >
               Text
             </Badge>
             <Badge
               onClick={() => setSelectedType("image")}
-              className={
-                selectedType === "image"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200"
-              }
+              className={selectedType === "image" ? "bg-blue-500 text-white" : "bg-gray-200"}
             >
               Image
             </Badge>
@@ -133,12 +160,7 @@ const UploadModal = ({ isOpen, onClose }) => {
             <Label htmlFor="date" className="text-sm font-medium">
               Date
             </Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             <Label htmlFor="place" className="text-sm font-medium">
               Place
             </Label>
@@ -180,13 +202,7 @@ const UploadModal = ({ isOpen, onClose }) => {
             <Label htmlFor="file" className="text-sm font-medium">
               File
             </Label>
-            <Input
-              id="file"
-              type="file"
-              placeholder="File"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
+            <Input id="file" type="file" placeholder="File" accept="image/*" onChange={handleFileChange} />
           </div>
           {response && <div className="text-sm text-gray-500">{response}</div>}
         </CardContent>
