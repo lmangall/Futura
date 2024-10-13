@@ -84,9 +84,8 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
   if (!isOpen) return null;
 
   const [selectedType, setSelectedType] = useState<"text" | "image">("text");
-  // Metadata fields
-  const [imageContent, setImageContent] = useState<number[]>([]); // Add state for imageContent
-  const [textContent, setTextContent] = useState<string>(""); // Add state for textContent
+  const [imageContent, setImageContent] = useState<number[]>([]);
+  const [textContent, setTextContent] = useState<string>("");
   const [fileNemeInput, setfileNemeInput] = useState<string>("example.jpg");
   const [fileTypeInput, setfileTypeInput] = useState<string>("image/jpeg");
   const [fileSizeInput, setfileSizeInput] = useState<bigint>(BigInt(1000));
@@ -101,9 +100,10 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [response, setResponse] = useState("");
 
+  // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      setFile(e.target.files[0]); // Set file state
     }
   };
 
@@ -122,7 +122,7 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
           transformRequest: (request: any) => request,
         };
 
-        const agent = new HttpAgent({ identity: userIdentity });
+        const agent = await HttpAgent.create({ identity: userIdentity });
 
         if (process.env.NODE_ENV !== "production") {
           await agent.fetchRootKey();
@@ -147,6 +147,7 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
       });
       const content = Array.from(new Uint8Array(fileContent));
       setImageContent(content); // Set imageContent state
+      console.log("File content set for image:", content); // Add this log to verify content
     }
 
     const metadata = {

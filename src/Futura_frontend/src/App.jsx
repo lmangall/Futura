@@ -9,11 +9,7 @@ import { Testimonials } from "@/components/Testimonials";
 import { Team } from "./components/Team";
 import { Features } from "./components/Features";
 import { Logos } from "./components/Logos";
-// import { Footer } from "./components/Footer";
-// import MemoryForm from "./components/MemoryForm";
-// import ImageUploadForm from "./components/ImageUploadForm";
-// import { Button } from "./components/ui/button";
-// import UploadModal from "@/components/modals/UploadModal";
+import GreetComponent from "./components/GreetComponent";
 
 function App() {
   const [greeting, setGreeting] = useState("");
@@ -46,25 +42,7 @@ function App() {
               <Testimonials />
               <Team />
               <Logos />
-              {/* <Footer /> */}
-              {/* <img
-                src="/logo2.svg"
-                alt="DFINITY logo"
-                className="max-w-[50vw] max-h-[25vw] block m-auto"
-              />
-              <br />
-              <div>
-                <Button>
-                  <Link to="/dashboard">Go to Dashboard</Link>
-                </Button>
-              </div>
-              <MemoryForm />
-              <Button onClick={handleOpenModal}>Upload</Button>
-              <UploadModal isOpen={isModalOpen} onClose={handleCloseModal} />
-              <ImageUploadForm />
-              <Button>
-                <Link to="/authentication">Log in</Link>
-              </Button> */}
+              <GreetComponent />
             </main>
           }
         />
