@@ -1,21 +1,93 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { idlFactory, canisterId } from "../../../declarations/futura_backend"; // Adjusted path to your backend's Candid file
-
-const agent = HttpAgent.create({ host: import.meta.env.VITE_CANISTER_HOST }); // Use the host from .env
-const actor = Actor.createActor(idlFactory, { agent, canisterId: canisterId }); // Use the canister ID from .env
 
 const CheckCaller = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [checkType, setCheckType] = useState("anonymous"); // Default to 'anonymous'
+  const [actor, setActor] = useState(null);
+
+  const createActor = (canisterId, options = {}) => {
+    const agent = options.agent || new HttpAgent({ ...options.agentOptions });
+
+    // Fetch root key for certificate validation during development
+    if (import.meta.env.VITE_DFX_NETWORK !== "ic") {
+      agent.fetchRootKey().catch((err) => {
+        console.warn("Unable to fetch root key. Check to ensure that your local replica is running");
+        console.error(err);
+      });
+    }
+
+    // Creates an actor using the candid interface and the HttpAgent
+    return Actor.createActor(idlFactory, {
+      agent,
+      canisterId,
+      ...options.actorOptions,
+    });
+  };
+
+  useEffect(() => {
+    const initializeAgent = async () => {
+      try {
+        console.log("Checking if connected to Plug...");
+        const connected = await window.ic.plug.isConnected();
+        console.log("Connected to Plug:", connected);
+
+        if (!connected) {
+          console.log("Requesting connection to Plug...");
+          await window.ic.plug.requestConnect(); // Request connection if not connected
+          console.log("Connection requested.");
+        } else {
+          console.log("Already connected to Plug.");
+        }
+
+        console.log("Creating agent with Plug...");
+        const agent = await window.ic.plug.createAgent(); // Create agent with Plug
+        console.log("Agent created:", agent);
+
+        // Check if the agent is an instance of HttpAgent
+        if (agent instanceof HttpAgent) {
+          // Fetch root key for certificate validation during development
+          if (import.meta.env.VITE_DFX_NETWORK !== "ic") {
+            await agent.fetchRootKey().catch((err) => {
+              console.warn("Unable to fetch root key. Check to ensure that your local replica is running");
+              console.error(err);
+            });
+          }
+        } else {
+          console.warn("The agent is not an instance of HttpAgent. Cannot fetch root key.");
+        }
+
+        // const actorInstance = Actor.createActor(idlFactory, { agent, canisterId });
+        const actorInstance = createActor(canisterId); // Use the createActor function
+
+        console.log("Actor instance created:", actorInstance);
+        setActor(actorInstance); // Set the actor instance
+      } catch (err) {
+        console.error("Error initializing agent:", err);
+        setError("Failed to initialize agent.");
+      }
+    };
+
+    initializeAgent();
+  }, []);
 
   const handleCheckCaller = async () => {
+    if (!actor) {
+      console.warn("Actor not initialized. Cannot make call.");
+      setError("Actor not initialized.");
+      return;
+    }
+
     try {
+      console.log("Calling check_caller...");
       const response = await actor.check_caller(); // Call the check_caller function
+      console.log("Response from check_caller:", response);
       setResult(response);
       setError(null);
     } catch (err) {
+      console.error("Error calling check_caller:", err);
       setError(err.message);
       setResult(null);
     }
