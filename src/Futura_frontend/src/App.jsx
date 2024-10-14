@@ -10,10 +10,11 @@ import { Team } from "./components/Team";
 import { Features } from "./components/Features";
 import { Logos } from "./components/Logos";
 import GreetComponent from "./components/GreetComponent";
-import GreetComponentShadcn from "./components/GreetComponentSchadcn";
 import RetrieveCapsuleStatsComponent from "./components/RetrieveCapsuleStatsComponent";
 import CheckCaller from "./components/CheckCaller";
-
+import PlugDisplayInfo from "./components/PlugDisplayInfo";
+import PlugDisplayInfoShadcn from "./components/PlugDisplayInfoShadcn";
+import PlugDisplayInfoShadcnTwo from "./components/PlugDisplayInfoShadcnTwo";
 function App() {
   const [greeting, setGreeting] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,6 +47,9 @@ function App() {
               <Team />
               <Logos />
               <GreetComponent />
+              <PlugDisplayInfo />
+              <PlugDisplayInfoShadcn />
+              <PlugDisplayInfoShadcnTwo />
               <RetrieveCapsuleStatsComponent />
               <CheckCaller />
             </main>
